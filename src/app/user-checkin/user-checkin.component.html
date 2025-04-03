@@ -1,0 +1,47 @@
+<h2>Danh Sách Chấm Công</h2>
+<input type="file" id="fileInput" (change)="onFileChange($event)" accept=".xlsx, .xls"
+    style="margin-left: 10px; display: none;">
+
+<div class="" style="display: flex; gap: 10px;">
+    <button mat-raised-button color="primary" (click)="openDialog()">Thêm Chấm Công</button>
+    <button mat-raised-button color="primary"><label for="fileInput">Import Chấm Công</label></button>
+</div>
+
+<table mat-table [dataSource]="attendanceData" class="mat-elevation-z8">
+    <ng-container matColumnDef="employee">
+        <th mat-header-cell *matHeaderCellDef> Nhân viên </th>
+        <td mat-cell *matCellDef="let row"> {{ row.employee }} </td>
+    </ng-container>
+
+    <ng-container matColumnDef="date">
+        <th mat-header-cell *matHeaderCellDef> Ngày </th>
+        <td mat-cell *matCellDef="let row"> {{ row.date }} </td>
+    </ng-container>
+
+    <ng-container matColumnDef="timeIn">
+        <th mat-header-cell *matHeaderCellDef> Giờ vào </th>
+        <td mat-cell *matCellDef="let row"> {{ row.timeIn }} </td>
+    </ng-container>
+
+    <ng-container matColumnDef="timeOut">
+        <th mat-header-cell *matHeaderCellDef> Giờ ra </th>
+        <td mat-cell *matCellDef="let row"> {{ row.timeOut }} </td>
+    </ng-container>
+
+    <ng-container matColumnDef="lunchStart">
+        <th mat-header-cell *matHeaderCellDef> Nghỉ trưa </th>
+        <td mat-cell *matCellDef="let row"> {{ row.lunchStart }} - {{ row.lunchEnd }} </td>
+    </ng-container>
+
+    <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef> Hành động </th>
+        <td mat-cell *matCellDef="let row">
+            <button mat-icon-button (click)="openDialog(row)">
+                <mat-icon>edit</mat-icon>
+            </button>
+        </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+</table>

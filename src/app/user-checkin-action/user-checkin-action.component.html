@@ -1,0 +1,44 @@
+<h2 mat-dialog-title>{{ data.id ? 'Sửa' : 'Thêm' }} Chấm Công</h2>
+<form [formGroup]="attendanceForm">
+    <div mat-dialog-content>
+        <mat-form-field appearance="outline">
+            <mat-label>Nhân viên</mat-label>
+            <input matInput formControlName="employeeId">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+            <mat-label>Ngày</mat-label>
+            <input matInput type="date" formControlName="date">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+            <mat-label>Giờ vào</mat-label>
+            <input matInput type="time" formControlName="timeIn">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+            <mat-label>Giờ ra</mat-label>
+            <input matInput type="time" formControlName="timeOut">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+            <mat-label>Bắt đầu nghỉ trưa</mat-label>
+            <input matInput type="time" formControlName="lunchStart">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+            <mat-label>Kết thúc nghỉ trưa</mat-label>
+            <input matInput type="time" formControlName="lunchEnd">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+            <mat-label>Ghi chú</mat-label>
+            <textarea matInput formControlName="note"></textarea>
+        </mat-form-field>
+    </div>
+
+    <div mat-dialog-actions>
+        <button mat-button (click)="onCancel()">Hủy</button>
+        <button mat-raised-button color="primary" [disabled]="attendanceForm.invalid" (click)="onSave()">Lưu</button>
+    </div>
+</form>
