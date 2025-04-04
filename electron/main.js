@@ -1,4 +1,5 @@
 const { app, BrowserWindow, ipcMain } = require('electron');
+const { autoUpdater } = require('electron-updater');
 const path = require('path');
 const db = require("./db/database");
 const url = require("url");
@@ -25,6 +26,7 @@ app.whenReady().then(() => {
 
   // mainWindow.loadURL("http://localhost:4200");
   // mainWindow.webContents.openDevTools();
+  autoUpdater.checkForUpdatesAndNotify();
 });
 
 // Lắng nghe sự kiện từ Angular để lấy dữ liệu nhân viên
@@ -121,3 +123,34 @@ ipcMain.handle('importAttendance', async (_, attendanceList) => {
 
 
 ipcMain.handle('openDevTools', () => mainWindow.webContents.openDevTools());
+autoUpdater.on("update-available", () => {
+  // show dialog
+  dialog
+    .showMessageBox({
+      type: "info",
+      title: "Cập nhật có sẵn",
+      message: "Một bản cập nhật mới đã có sẵn. Bạn có muốn cập nhật ngay bây giờ không?",
+      buttons: ["Có", "Không"],
+    })
+    .then((result) => {
+      if (result.response === 0) {
+        autoUpdater.downloadUpdate();
+      }
+    });
+});
+
+autoUpdater.on("update-downloaded", () => {
+  // show dialog
+  dialog
+    .showMessageBox({
+      type: "info",
+      title: "Cập nhật đã tải xuống",
+      message: "Bản cập nhật đã được tải xuống. Bạn có muốn cài đặt ngay bây giờ không?",
+      buttons: ["Có", "Không"],
+    })
+    .then((result) => {
+      if (result.response === 0) {
+        autoUpdater.quitAndInstall();
+      }
+    });
+});
