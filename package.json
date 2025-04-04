@@ -55,7 +55,7 @@
   "build": {
     "appId": "com.sang.nv.user-checkin",
     "productName": "User Checkin",
-    "icon": "public/logo.ico",
+    "icon": "public/logo.png",
     "directories": {
       "output": "release",
       "buildResources": "public"
