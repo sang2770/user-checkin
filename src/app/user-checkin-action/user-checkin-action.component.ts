@@ -1,6 +1,7 @@
 import { Component, Inject, OnInit } from '@angular/core';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { IEmployee } from '../models/user.model';
 
 @Component({
   selector: 'app-user-checkin-action',
@@ -9,17 +10,22 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 })
 export class UserCheckinActionComponent implements OnInit {
   attendanceForm!: FormGroup;
+  employees: IEmployee[] = [];
 
   constructor(
     private fb: FormBuilder,
     public dialogRef: MatDialogRef<UserCheckinActionComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any
-  ) { }
+  ) {
+    (window as any).electronAPI.getEmployees({}).then((employees: IEmployee[]) => {
+      this.employees = employees;
+    });
+  }
 
   ngOnInit() {
     this.attendanceForm = this.fb.group({
       employeeId: [this.data?.employeeId || '', Validators.required],
-      date: [this.data?.date || '', Validators.required],
+      date: [this.data?.date ? new Date(Number(this.data?.date)) : undefined, Validators.required],
       timeIn: [this.data?.timeIn || '', Validators.required],
       timeOut: [this.data?.timeOut || '', Validators.required],
       lunchStart: [this.data?.lunchStart || ''],
@@ -31,18 +37,13 @@ export class UserCheckinActionComponent implements OnInit {
   onSave() {
     if (this.attendanceForm.valid) {
       const attendanceData = { ...this.data, ...this.attendanceForm.value };
-
-      (window as any).electronAPI.addAttendance(
-        attendanceData.employeeId,
-        attendanceData.date,
-        attendanceData.timeIn,
-        attendanceData.timeOut,
-        null, // totalHours (tính toán sau)
-        attendanceData.lunchStart,
-        attendanceData.lunchEnd,
-        null, // lunchHours (tính toán sau)
-        attendanceData.note
-      ).then(() => this.dialogRef.close(true));
+      if (attendanceData.id) {
+        (window as any).electronAPI.updateAttendance(attendanceData.id, attendanceData).then(() => this.dialogRef.close(true));
+      } else {
+        (window as any).electronAPI.addAttendance(attendanceData).then((res: any) => {
+          this.dialogRef.close(true);
+        });
+      }
     }
   }
 

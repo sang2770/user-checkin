@@ -1,37 +1,44 @@
 <h2 mat-dialog-title>{{ data.id ? 'Sửa' : 'Thêm' }} Chấm Công</h2>
 <form [formGroup]="attendanceForm">
     <div mat-dialog-content>
-        <mat-form-field appearance="outline">
+        <mat-form-field appearance="outline" style="width: 100%;">
             <mat-label>Nhân viên</mat-label>
-            <input matInput formControlName="employeeId">
+            <mat-select formControlName="employeeId">
+                <mat-option *ngFor="let employee of employees" [value]="employee.id">
+                    {{employee.name}}
+                </mat-option>
+            </mat-select>
         </mat-form-field>
 
-        <mat-form-field appearance="outline">
+        <mat-form-field appearance="outline" style="width: 100%; margin-bottom: 10px;">
             <mat-label>Ngày</mat-label>
-            <input matInput type="date" formControlName="date">
+            <input matInput [matDatepicker]="picker" formControlName="date">
+            <mat-hint>MM/DD/YYYY</mat-hint>
+            <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+            <mat-datepicker #picker></mat-datepicker>
         </mat-form-field>
 
-        <mat-form-field appearance="outline">
+        <mat-form-field appearance="outline" style="width: 100%; margin-bottom: 10px;">
             <mat-label>Giờ vào</mat-label>
             <input matInput type="time" formControlName="timeIn">
         </mat-form-field>
 
-        <mat-form-field appearance="outline">
+        <mat-form-field appearance="outline" style="width: 100%; margin-bottom: 10px;">
             <mat-label>Giờ ra</mat-label>
             <input matInput type="time" formControlName="timeOut">
         </mat-form-field>
 
-        <mat-form-field appearance="outline">
+        <mat-form-field appearance="outline" style="width: 100%; margin-bottom: 10px;">
             <mat-label>Bắt đầu nghỉ trưa</mat-label>
             <input matInput type="time" formControlName="lunchStart">
         </mat-form-field>
 
-        <mat-form-field appearance="outline">
+        <mat-form-field appearance="outline" style="width: 100%; margin-bottom: 10px;">
             <mat-label>Kết thúc nghỉ trưa</mat-label>
             <input matInput type="time" formControlName="lunchEnd">
         </mat-form-field>
 
-        <mat-form-field appearance="outline">
+        <mat-form-field appearance="outline" style="width: 100%; margin-bottom: 10px;">
             <mat-label>Ghi chú</mat-label>
             <textarea matInput formControlName="note"></textarea>
         </mat-form-field>
@@ -39,6 +46,6 @@
 
     <div mat-dialog-actions>
         <button mat-button (click)="onCancel()">Hủy</button>
-        <button mat-raised-button color="primary" [disabled]="attendanceForm.invalid" (click)="onSave()">Lưu</button>
+        <button mat-raised-button color="primary" (click)="onSave()" [disabled]="attendanceForm.invalid">Lưu</button>
     </div>
 </form>

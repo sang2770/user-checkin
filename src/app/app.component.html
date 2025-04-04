@@ -2,4 +2,27 @@
   <span class="loader"></span>
 </div>
 
-<router-outlet></router-outlet>
+<mat-sidenav-container class="sidenav-container">
+  <!-- Sidebar -->
+  <mat-sidenav #sidenav mode="side" opened>
+    <mat-nav-list>
+      <a mat-list-item routerLink="/">🏠 Nhân viên</a>
+      <a mat-list-item routerLink="/checkin">ℹ️ Chấm công</a>
+      <a mat-list-item routerLink="/department">🏢 Phòng ban</a>
+      <a mat-list-item routerLink="/position">👔 Chức vụ</a>
+    </mat-nav-list>
+  </mat-sidenav>
+
+  <!-- Nội dung chính -->
+  <mat-sidenav-content>
+    <mat-toolbar color="primary">
+      <button mat-icon-button (click)="sidenav.toggle()">
+        <mat-icon>menu</mat-icon>
+      </button>
+      <span style="font-size: 18px; font-weight: bold;">Hệ thống quản lý nhân viên</span>
+    </mat-toolbar>
+    <div class="content">
+      <router-outlet></router-outlet>
+    </div>
+  </mat-sidenav-content>
+</mat-sidenav-container>

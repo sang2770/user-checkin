@@ -1,5 +1,8 @@
 import { IModel } from "./common.model";
 
+export interface IPosition extends IModel {
+
+}
 export interface IDepartment extends IModel {
 
 }
@@ -7,6 +10,9 @@ export interface IDepartment extends IModel {
 export interface IEmployee extends IModel {
     departmentId?: number;
     department?: IDepartment;
+
+    positionId?: number;
+    position?: IPosition;
 }
 
 

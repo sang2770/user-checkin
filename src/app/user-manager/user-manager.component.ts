@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { UserManagerActionComponent } from '../user-manager-action/user-manager-action.component';
-import { IEmployee } from '../models/user.model';
+import { IDepartment, IEmployee, IPosition } from '../models/user.model';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatDialog } from '@angular/material/dialog';
 
@@ -10,24 +10,44 @@ import { MatDialog } from '@angular/material/dialog';
   styleUrl: './user-manager.component.css'
 })
 export class UserManagerComponent implements OnInit {
-  displayedColumns: string[] = ['code', 'name', 'department', 'actions'];
+  displayedColumns: string[] = ['stt', 'code', 'name', 'department', 'position', 'actions'];
   dataSource = new MatTableDataSource<IEmployee>([]);
+  departmentList: IDepartment[] = [];
+  positionList: IPosition[] = [];
+  filter: {
+    keyword?: string;
+    departmentId?: number;
+    positionId?: number;
+  } = {};
 
   constructor(private dialog: MatDialog) { }
 
-  ngOnInit() {
+  async ngOnInit() {
+    await this.loadDepartments();
+    await this.loadPositions();
     this.loadEmployees();
   }
 
   loadEmployees() {
-    (window as any).electronAPI.getEmployees().then((employees: IEmployee[]) => {
+
+    (window as any).electronAPI.getEmployees(this.filter).then((employees: IEmployee[]) => {
+      employees.forEach((employee: IEmployee) => {
+        employee.department = this.departmentList.find(department => department.id === employee.departmentId);
+        employee.position = this.positionList.find(position => position.id === employee.positionId);
+        console.log(employee);
+
+      })
+
       this.dataSource.data = employees;
     });
   }
 
-  applyFilter(event: Event) {
-    const filterValue = (event.target as HTMLInputElement).value;
-    this.dataSource.filter = filterValue.trim().toLowerCase();
+  async loadDepartments() {
+    this.departmentList = await (window as any).electronAPI.getDepartments();
+  }
+
+  async loadPositions() {
+    this.positionList = await (window as any).electronAPI.getPositions();
   }
 
   openDialog(employee?: IEmployee) {
