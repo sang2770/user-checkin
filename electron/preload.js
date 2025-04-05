@@ -24,5 +24,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
   importAttendance: (attendanceList) => ipcRenderer.invoke('importAttendance', attendanceList),
 
   openDevTools: () => ipcRenderer.invoke('openDevTools'),
+
+  getSettings: () => ipcRenderer.invoke('getSettings'),
+  setSetting: (key, value) => ipcRenderer.invoke('setSetting', key, value),
 });
 

@@ -43,3 +43,4 @@ Thumbs.db
 
 # Release
 release/
+electron/dist

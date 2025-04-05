@@ -11,6 +11,7 @@ export class AppComponent implements OnInit {
   @ViewChild('animation', { static: true }) animation: ElementRef | undefined;
   isVisible: boolean = false;
   isRequiredKey: boolean = false;
+  isShowDemo: boolean = false;
   constructor(private cdr: ChangeDetectorRef, public loadingService: LoadingService) {
 
   }
@@ -18,6 +19,14 @@ export class AppComponent implements OnInit {
     this.loadingService.isLoading$.subscribe(isLoading => {
       this.isVisible = isLoading;
       this.cdr.detectChanges();
+    });
+    (window as any).electronAPI.getSettings().then((settings: any) => {
+      if (settings.length > 0) {
+        this.isShowDemo = true;
+      } else {
+        this.isShowDemo = false;
+        (window as any).electronAPI.setSetting('isShowDemo', true);
+      }
     });
   }
 

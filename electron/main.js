@@ -121,6 +121,9 @@ ipcMain.handle('importAttendance', async (_, attendanceList) => {
 });
 
 
+ipcMain.handle('getSettings', async () => await db.getSettings());
+ipcMain.handle('setSetting', async (_, key, value) => await db.setSetting(key, value));
+
 
 ipcMain.handle('openDevTools', () => mainWindow.webContents.openDevTools());
 autoUpdater.on("update-available", () => {

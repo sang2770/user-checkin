@@ -1,5 +1,8 @@
 const { Database } = require('sqlite3').verbose();
-const db = new Database('employees.db', (err) => {
+const { app } = require('electron');
+const path = require('path');
+const dbPath = path.join(app.getPath('userData'), 'employees.db');
+const db = new Database(dbPath, (err) => {
   if (err) {
     console.error('Error opening database:', err.message);
   } else {
@@ -48,6 +51,13 @@ db.serialize(() => {
             lunchHours REAL,
             note TEXT,
             FOREIGN KEY(employeeId) REFERENCES employees(id) ON DELETE CASCADE
+        )
+    `);
+  db.run(`
+        CREATE TABLE IF NOT EXISTS settings (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            key TEXT UNIQUE,
+            value TEXT
         )
     `);
 });
@@ -302,6 +312,25 @@ module.exports = {
         });
       });
     });
-  }
+  },
 
+  getSettings: () => {
+    return new Promise((resolve, reject) => {
+      db.all("SELECT * FROM settings", [], (err, rows) => {
+        if (err) reject(err);
+        resolve(rows);
+      });
+    });
+  },
+
+  setSetting: (key, value) => {
+    return new Promise((resolve, reject) => {
+      db.run("INSERT INTO settings (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = ?",
+        [key, value, value],
+        (err) => {
+          if (err) reject(err);
+          resolve();
+        });
+    });
+  }
 };
