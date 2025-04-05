@@ -274,6 +274,23 @@ module.exports = {
     });
   },
 
+  deleteAttendancesByIds: (ids) => {
+    return new Promise((resolve, reject) => {
+      if (!ids || ids.length === 0) {
+        return resolve(); // không có gì để xóa
+      }
+  
+      const placeholders = ids.map(() => '?').join(','); // tạo chuỗi ?,?,?... tùy theo số lượng id
+      const query = `DELETE FROM attendance WHERE id IN (${placeholders})`;
+  
+      db.run(query, ids, function(err) {
+        if (err) return reject(err);
+        resolve({ deletedCount: this.changes }); // trả về số dòng bị xóa
+      });
+    });
+  },
+  
+
   updateAttendance: (id, attendanceData) => {
     return new Promise((resolve, reject) => {
       db.run("UPDATE attendance SET employeeId = ?, date = ?, timeIn = ?, timeOut = ?, totalHours = ?, lunchStart = ?, lunchEnd = ?, lunchHours = ?, note = ? WHERE id = ?",

@@ -34,7 +34,7 @@ import { PositionComponent } from './position/position.component';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { PositionActionComponent } from './position-action/position-action.component';
 import { Platform } from '@angular/cdk/platform';
-
+import {MatCheckboxModule} from '@angular/material/checkbox';
 export class CustomDateAdapter extends NativeDateAdapter {
   override format(date: Date, displayFormat: any): string {
     const days = date.getDate();
@@ -68,7 +68,8 @@ export class CustomDateAdapter extends NativeDateAdapter {
     MatToolbarModule,
     MatListModule,
     MatSelectModule,
-    MatDatepickerModule
+    MatDatepickerModule,
+    MatCheckboxModule
   ],
   providers: [provideNativeDateAdapter(),
   {

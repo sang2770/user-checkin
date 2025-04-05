@@ -69,6 +69,7 @@ ipcMain.handle('addAttendance', async (_, attendanceData) => {
 }
 );
 ipcMain.handle('deleteAttendance', async (_, id) => await db.deleteAttendance(id))
+ipcMain.handle('deleteAttendancesByIds', async (_, ids) => await db.deleteAttendancesByIds(ids));
 ipcMain.handle('updateAttendance', async (_, id, attendanceData) => await db.updateAttendance(id, attendanceData));
 ipcMain.handle('importAttendance', async (_, attendanceList) => {
   const employeeList = await db.getEmployees({});
