@@ -60,6 +60,23 @@ db.serialize(() => {
             value TEXT
         )
     `);
+  db.run(`
+      CREATE TABLE IF NOT EXISTS devices (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT,
+        serial_number TEXT UNIQUE,
+        area TEXT,
+        ip_address TEXT,
+        status TEXT,
+        last_active DATE,
+        user TEXT,
+        fingerprint TEXT,
+        face TEXT,
+        palm TEXT,
+        event TEXT,
+        command TEXT
+      )
+    `);
 });
 
 module.exports = {
@@ -279,17 +296,17 @@ module.exports = {
       if (!ids || ids.length === 0) {
         return resolve(); // không có gì để xóa
       }
-  
+
       const placeholders = ids.map(() => '?').join(','); // tạo chuỗi ?,?,?... tùy theo số lượng id
       const query = `DELETE FROM attendance WHERE id IN (${placeholders})`;
-  
-      db.run(query, ids, function(err) {
+
+      db.run(query, ids, function (err) {
         if (err) return reject(err);
         resolve({ deletedCount: this.changes }); // trả về số dòng bị xóa
       });
     });
   },
-  
+
 
   updateAttendance: (id, attendanceData) => {
     return new Promise((resolve, reject) => {
@@ -348,6 +365,83 @@ module.exports = {
           if (err) reject(err);
           resolve();
         });
+    });
+  },
+  getDevices: () => {
+    return new Promise((resolve, reject) => {
+      db.all("SELECT * FROM devices", [], (err, rows) => {
+        if (err) reject(err);
+        resolve(rows);
+      });
+    });
+  },
+
+  // Thêm thiết bị mới
+  addDevice: (device) => {
+    return new Promise((resolve, reject) => {
+      db.run(`
+        INSERT INTO devices (
+          name, serial_number, area, ip_address, status, last_active,
+          user, fingerprint, face, palm, event, command
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [
+          device.name,
+          device.serial_number,
+          device.area,
+          device.ip_address,
+          device.status,
+          device.last_active,
+          device.user,
+          device.fingerprint,
+          device.face,
+          device.palm,
+          device.event,
+          device.command
+        ],
+        function (err) {
+          if (err) reject(err);
+          resolve({ id: this.lastID });
+        });
+    });
+  },
+
+  // Cập nhật thiết bị
+  updateDevice: (id, device) => {
+    return new Promise((resolve, reject) => {
+      db.run(`
+        UPDATE devices SET
+          name = ?, serial_number = ?, area = ?, ip_address = ?, status = ?, last_active = ?,
+          user = ?, fingerprint = ?, face = ?, palm = ?, event = ?, command = ?
+        WHERE id = ?`,
+        [
+          device.name,
+          device.serial_number,
+          device.area,
+          device.ip_address,
+          device.status,
+          device.last_active,
+          device.user,
+          device.fingerprint,
+          device.face,
+          device.palm,
+          device.event,
+          device.command,
+          id
+        ],
+        (err) => {
+          if (err) reject(err);
+          resolve();
+        });
+    });
+  },
+
+  // Xóa thiết bị
+  deleteDevice: (id) => {
+    return new Promise((resolve, reject) => {
+      db.run("DELETE FROM devices WHERE id = ?", [id], (err) => {
+        if (err) reject(err);
+        resolve();
+      });
     });
   }
 };

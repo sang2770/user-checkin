@@ -30,3 +30,18 @@ export interface IAttendance extends IModel {
 
     note?: string;
 }
+
+
+export interface IDevice extends IModel {
+    serial_number?: string;
+    area?: string;
+    ip_address?: string;
+    status?: string;
+    last_active?: string; // ISO date string, ví dụ: '2025-04-06'
+    user?: string;
+    fingerprint?: string;
+    face?: string;
+    palm?: string;
+    event?: string;
+    command?: string;
+}

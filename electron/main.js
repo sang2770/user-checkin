@@ -16,20 +16,26 @@ app.whenReady().then(() => {
     }
   });
 
-  mainWindow.loadURL(
-    url.format({
-      pathname: path.join(__dirname, `dist/user-checkin/browser/index.html`),
-      protocol: "file:",
-      slashes: true
-    })
-  );
+  // mainWindow.loadURL(
+  //   url.format({
+  //     pathname: path.join(__dirname, `dist/user-checkin/browser/index.html`),
+  //     protocol: "file:",
+  //     slashes: true
+  //   })
+  // );
 
-  // mainWindow.loadURL("http://localhost:4200");
+  mainWindow.loadURL("http://localhost:4200");
   // mainWindow.webContents.openDevTools();
   autoUpdater.checkForUpdatesAndNotify();
+  mainWindow.setMenuBarVisibility(false);
 });
 
 // Lắng nghe sự kiện từ Angular để lấy dữ liệu nhân viên
+
+ipcMain.handle('getDevices', async () => await db.getDevices());
+ipcMain.handle('addDevice', async (_, device) => await db.addDevice(device));
+ipcMain.handle('deleteDevice', async (_, id) => await db.deleteDevice(id));
+ipcMain.handle('updateDevice', async (_, id, device) => await db.updateDevice(id, device));
 
 ipcMain.handle('getDepartments', async () => await db.getDepartments());
 ipcMain.handle('addDepartment', async (_, code, name) => await db.addDepartment(code, name));
@@ -122,11 +128,14 @@ ipcMain.handle('importAttendance', async (_, attendanceList) => {
 });
 
 
+
 ipcMain.handle('getSettings', async () => await db.getSettings());
 ipcMain.handle('setSetting', async (_, key, value) => await db.setSetting(key, value));
 
 
-ipcMain.handle('openDevTools', () => mainWindow.webContents.openDevTools());
+ipcMain.handle('openDevTools', () => {
+  mainWindow.webContents.openDevTools()
+});
 autoUpdater.on("update-available", () => {
   // show dialog
   dialog

@@ -34,7 +34,10 @@ import { PositionComponent } from './position/position.component';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { PositionActionComponent } from './position-action/position-action.component';
 import { Platform } from '@angular/cdk/platform';
-import {MatCheckboxModule} from '@angular/material/checkbox';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { DevicesManagerComponent } from './devices-manager/devices-manager.component';
+import { DevicesActionComponent } from './devices-action/devices-action.component';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 export class CustomDateAdapter extends NativeDateAdapter {
   override format(date: Date, displayFormat: any): string {
     const days = date.getDate();
@@ -46,7 +49,7 @@ export class CustomDateAdapter extends NativeDateAdapter {
 
 @NgModule({
   declarations: [AppComponent, UserManagerComponent, UserManagerActionComponent, UserCheckinComponent, UserCheckinActionComponent, DepartmentComponent, DepartmentActionComponent,
-    PositionComponent, PositionActionComponent
+    PositionComponent, PositionActionComponent, DevicesManagerComponent, DevicesActionComponent
   ],
   imports: [
     CommonModule,
@@ -69,7 +72,8 @@ export class CustomDateAdapter extends NativeDateAdapter {
     MatListModule,
     MatSelectModule,
     MatDatepickerModule,
-    MatCheckboxModule
+    MatCheckboxModule,
+    MatSlideToggleModule
   ],
   providers: [provideNativeDateAdapter(),
   {

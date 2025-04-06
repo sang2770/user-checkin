@@ -4,7 +4,7 @@ import { UserManagerComponent } from './user-manager/user-manager.component';
 import { UserCheckinComponent } from './user-checkin/user-checkin.component';
 import { DepartmentComponent } from './department/department.component';
 import { PositionComponent } from './position/position.component';
-console.log('Routing module loaded');
+import { DevicesManagerComponent } from './devices-manager/devices-manager.component';
 
 const routes: Routes = [
   {
@@ -22,6 +22,10 @@ const routes: Routes = [
   {
     path: 'position',
     component: PositionComponent
+  },
+  {
+    path: 'devices',
+    component: DevicesManagerComponent
   }
 ];
 
