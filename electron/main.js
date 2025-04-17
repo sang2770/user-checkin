@@ -78,53 +78,53 @@ ipcMain.handle('deleteAttendance', async (_, id) => await db.deleteAttendance(id
 ipcMain.handle('deleteAttendancesByIds', async (_, ids) => await db.deleteAttendancesByIds(ids));
 ipcMain.handle('updateAttendance', async (_, id, attendanceData) => await db.updateAttendance(id, attendanceData));
 ipcMain.handle('importAttendance', async (_, attendanceList) => {
+  const BATCH_SIZE = 500;
   const employeeList = await db.getEmployees({});
   const departmentList = await db.getDepartments();
   const positionList = await db.getPositions();
 
-  // Tạo map để tra cứu nhanh
   const departmentMap = new Map(departmentList.map(dep => [dep.name, dep]));
   const positionMap = new Map(positionList.map(pos => [pos.name, pos]));
-
-  // Dùng employeeCode làm key
   const employeeMap = new Map(employeeList.map(emp => [emp.code, emp]));
 
-  for (const item of attendanceList) {
-    // Tạo department nếu chưa có
-    let department = departmentMap.get(item.departmentName);
-    if (!department && item.departmentName?.length > 0) {
-      const newDepartment = await db.addDepartment(item.departmentName, item.departmentName);
-      department = { id: newDepartment.id, name: item.departmentName };
-      departmentMap.set(item.departmentName, department);
-    }
+  const processedItems = [];
+  
+  for (let i = 0; i < attendanceList.length; i += BATCH_SIZE) {
+    const batch = attendanceList.slice(i, i + BATCH_SIZE);
+    
+    for (const item of batch) {
+      let department = departmentMap.get(item.departmentName);
+      if (!department && item.departmentName?.length > 0) {
+        const newDepartment = await db.addDepartment(item.departmentName, item.departmentName);
+        department = { id: newDepartment.id, name: item.departmentName };
+        departmentMap.set(item.departmentName, department);
+      }
 
-    // Tạo position nếu chưa có (nếu cần)
-    let position = positionMap.get(item.positionName);
-    if (!position && item.positionName?.length > 0) {
-      const newPosition = await db.addPosition(item.positionName, item.positionName);
-      position = { id: newPosition.id, name: item.positionName };
-      positionMap.set(item.positionName, position);
-    }
+      let position = positionMap.get(item.positionName);
+      if (!position && item.positionName?.length > 0) {
+        const newPosition = await db.addPosition(item.positionName, item.positionName);
+        position = { id: newPosition.id, name: item.positionName };
+        positionMap.set(item.positionName, position);
+      }
 
-    // Tạo employee nếu chưa có — theo employeeCode
-    let employee = employeeMap.get(item.employeeCode);
-    if (!employee && item.employeeCode?.length > 0) {
-      const newEmployee = await db.addEmployee(
-        item.employeeCode,
-        item.employeeName,
-        department?.id,
-        position?.id
-      );
-      employee = { id: newEmployee.id, code: item.employeeCode, name: item.employeeName };
-      employeeMap.set(item.employeeCode, employee);
-    }
+      let employee = employeeMap.get(item.employeeCode);
+      if (!employee && item.employeeCode?.length > 0) {
+        const newEmployee = await db.addEmployee(
+          item.employeeCode,
+          item.employeeName,
+          department?.id,
+          position?.id
+        );
+        employee = { id: newEmployee.id, code: item.employeeCode, name: item.employeeName };
+        employeeMap.set(item.employeeCode, employee);
+      }
 
-    // Cập nhật employeeId để insert vào bảng attendance
-    item.employeeId = employee?.id;
+      item.employeeId = employee?.id;
+      processedItems.push(item);
+    }
   }
 
-  // Insert danh sách attendance
-  return await db.importAttendance(attendanceList);
+  return await db.importAttendance(processedItems);
 });
 
 

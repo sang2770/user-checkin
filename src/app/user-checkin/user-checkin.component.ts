@@ -101,19 +101,28 @@ export class UserCheckinComponent implements OnInit {
   onFileChange(event: any) {
     const target: DataTransfer = <DataTransfer>event.target;
     if (target.files.length !== 1) {
-      console.error('Chỉ được chọn một file!');
+      this._snackBar.open('Chỉ được chọn một file!', 'Đóng', { duration: 3000 });
       return;
     }
 
     const reader: FileReader = new FileReader();
     reader.onload = (e: any) => {
-      const bstr: string = e.target.result;
-      const wb: XLSX.WorkBook = XLSX.read(bstr, { type: 'binary' });
-      const wsname: string = wb.SheetNames[0];
-      const ws: XLSX.WorkSheet = wb.Sheets[wsname];
+      try {
+        const bstr: string = e.target.result;
+        const wb: XLSX.WorkBook = XLSX.read(bstr, { type: 'binary', cellDates: true });
+        const wsname: string = wb.SheetNames[0];
+        const ws: XLSX.WorkSheet = wb.Sheets[wsname];
 
-      const data = XLSX.utils.sheet_to_json(ws, { header: 1 });
-      this.importAttendance(data);
+        const data = XLSX.utils.sheet_to_json(ws, { header: 1, raw: false });
+        this.importAttendance(data);
+      } catch (error) {
+        this._snackBar.open('Lỗi khi đọc file Excel', 'Đóng', { duration: 3000 });
+        console.error('Lỗi khi đọc file Excel:', error);
+      }
+    };
+
+    reader.onerror = () => {
+      this._snackBar.open('Lỗi khi đọc file', 'Đóng', { duration: 3000 });
     };
 
     reader.readAsBinaryString(target.files[0]);
@@ -121,11 +130,16 @@ export class UserCheckinComponent implements OnInit {
 
   importAttendance(data: any[]) {
     if (data.length < 2) {
-      console.error('File Excel không có dữ liệu!');
+      this._snackBar.open('File Excel không có dữ liệu!', 'Đóng', { duration: 3000 });
       return;
     }
 
     const headers = data[2];
+    if (!headers) {
+      this._snackBar.open('File Excel không đúng định dạng!', 'Đóng', { duration: 3000 });
+      return;
+    }
+
     const indexMap: { [key: string]: number } = {
       employeeCode: headers.findIndex(
         (h: string) =>
@@ -155,53 +169,73 @@ export class UserCheckinComponent implements OnInit {
       ),
     };
 
+    // Kiểm tra các cột bắt buộc
+    const requiredColumns = ['employeeCode', 'employeeName', 'departmentName', 'date'];
+    const missingColumns = requiredColumns.filter(col => indexMap[col] === -1);
+    if (missingColumns.length > 0) {
+      this._snackBar.open(`Thiếu các cột bắt buộc: ${missingColumns.join(', ')}`, 'Đóng', { duration: 3000 });
+      return;
+    }
+
     const formatTime = (time: any): string => {
       if (!time) return '';
-      // Nếu giá trị là một số (Excel time format), chuyển thành thời gian
-      if (typeof time === 'number') {
-        const date = new Date(time * 24 * 60 * 60 * 1000); // Chuyển đổi số thành thời gian
-        return `${date.getHours().toString().padStart(2, '0')}:${date
-          .getMinutes()
-          .toString()
-          .padStart(2, '0')}`;
-      }
-      // Nếu là chuỗi kiểu 'hh:mm:ss'
-      if (typeof time === 'string' && time.includes(':')) {
-        return time.substring(0, 5); // Lấy 'hh:mm'
-      }
-      // Nếu là Date object
-      if (time instanceof Date) {
-        return `${time.getHours().toString().padStart(2, '0')}:${time
-          .getMinutes()
-          .toString()
-          .padStart(2, '0')}`;
+      try {
+        if (typeof time === 'number') {
+          const date = new Date(time * 24 * 60 * 60 * 1000);
+          return `${date.getHours().toString().padStart(2, '0')}:${date
+            .getMinutes()
+            .toString()
+            .padStart(2, '0')}`;
+        }
+        if (typeof time === 'string') {
+          if (time.includes(':')) {
+            return time.substring(0, 5);
+          }
+          // Xử lý các định dạng ngày giờ khác nếu cần
+        }
+        if (time instanceof Date) {
+          return `${time.getHours().toString().padStart(2, '0')}:${time
+            .getMinutes()
+            .toString()
+            .padStart(2, '0')}`;
+        }
+      } catch (error) {
+        console.error('Lỗi khi xử lý thời gian:', error);
       }
       return '';
     };
 
-    const attendanceList = data.slice(3).map((row) => ({
-      employeeCode: row[indexMap['employeeCode']],
-      employeeName: row[indexMap['employeeName']],
-      departmentName: row[indexMap['departmentName']],
-      date: row[indexMap['date']],
-      timeIn: formatTime(row[indexMap['timeIn']]),
-      lunchStart: formatTime(row[indexMap['lunchStart']]),
-      timeOut: formatTime(row[indexMap['timeOut']]),
-      lunchEnd: formatTime(row[indexMap['lunchEnd']]),
-    }));
+    const attendanceList = data.slice(3)
+      .filter(row => row && row.length > 0 && row[indexMap['employeeCode']])
+      .map((row) => ({
+        employeeCode: row[indexMap['employeeCode']]?.toString().trim(),
+        employeeName: row[indexMap['employeeName']]?.toString().trim(),
+        departmentName: row[indexMap['departmentName']]?.toString().trim(),
+        date: row[indexMap['date']],
+        timeIn: formatTime(row[indexMap['timeIn']]),
+        lunchStart: formatTime(row[indexMap['lunchStart']]),
+        timeOut: formatTime(row[indexMap['timeOut']]),
+        lunchEnd: formatTime(row[indexMap['lunchEnd']]),
+      }));
 
-    // console.log('attendanceList', attendanceList);
+    if (attendanceList.length === 0) {
+      this._snackBar.open('Không có dữ liệu hợp lệ để import', 'Đóng', { duration: 3000 });
+      return;
+    }
+
+    this._snackBar.open('Đang xử lý dữ liệu...', 'Đóng', { duration: 2000 });
 
     (window as any).electronAPI
       .importAttendance(attendanceList)
       .then(() => {
         this.loadAttendance();
-        this._snackBar.open('Import dữ liệu thành công', 'Đóng', {
+        this._snackBar.open(`Import thành công ${attendanceList.length} bản ghi`, 'Đóng', {
           duration: 3000,
         });
       })
       .catch((err: any) => {
-        this._snackBar.open('Lỗi import dữ liệu', 'Đóng', {
+        console.error('Lỗi khi import dữ liệu:', err);
+        this._snackBar.open('Lỗi khi import dữ liệu', 'Đóng', {
           duration: 3000,
         });
       });

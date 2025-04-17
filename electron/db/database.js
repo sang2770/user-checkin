@@ -321,28 +321,46 @@ module.exports = {
 
   importAttendance: (attendanceList) => {
     return new Promise((resolve, reject) => {
+      const BATCH_SIZE = 500;
+      const totalBatches = Math.ceil(attendanceList.length / BATCH_SIZE);
+      let processedBatches = 0;
+
       db.serialize(() => {
+        db.run('BEGIN TRANSACTION');
         const stmt = db.prepare(`INSERT INTO attendance
           (employeeId, date, timeIn, timeOut, totalHours, lunchStart, lunchEnd, lunchHours, note)
           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`);
 
-        for (const item of attendanceList) {
-          stmt.run([
-            item.employeeId,
-            item.date,
-            item.timeIn,
-            item.timeOut,
-            item.totalHours,
-            item.lunchStart,
-            item.lunchEnd,
-            item.lunchHours,
-            item.note
-          ]);
+        for (let i = 0; i < totalBatches; i++) {
+          const batch = attendanceList.slice(i, i + BATCH_SIZE);
+          for (const item of batch) {
+            stmt.run([
+              item.employeeId,
+              item.date,
+              item.timeIn,
+              item.timeOut,
+              item.totalHours,
+              item.lunchStart,
+              item.lunchEnd,
+              item.lunchHours,
+              item.note
+            ]);
+          }
+          processedBatches++;
         }
 
         stmt.finalize((err) => {
-          if (err) return reject(err);
-          resolve();
+          if (err) {
+            db.run('ROLLBACK');
+            return reject(err);
+          }
+          db.run('COMMIT', (commitErr) => {
+            if (commitErr) {
+              db.run('ROLLBACK');
+              return reject(commitErr);
+            }
+            resolve();
+          });
         });
       });
     });
