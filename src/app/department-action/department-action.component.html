@@ -1,0 +1,19 @@
+<h2 mat-dialog-title>{{ data.id ? 'Sửa' : 'Thêm' }} Phòng Ban</h2>
+<form [formGroup]="departmentForm">
+    <div mat-dialog-content>
+        <mat-form-field appearance="outline" style="width: 100%;">
+            <mat-label>Mã</mat-label>
+            <input matInput formControlName="code">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" style="width: 100%;">
+            <mat-label>Tên</mat-label>
+            <input matInput formControlName="name">
+        </mat-form-field>
+    </div>
+
+    <div mat-dialog-actions>
+        <button mat-button (click)="onCancel()">Hủy</button>
+        <button mat-raised-button color="primary" [disabled]="departmentForm.invalid" (click)="onSave()">Lưu</button>
+    </div>
+</form>

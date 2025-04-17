@@ -1,0 +1,37 @@
+<div class="container-loader" #loader *ngIf="isVisible">
+  <span class="loader"></span>
+</div>
+
+<mat-sidenav-container class="sidenav-container">
+  <!-- Sidebar -->
+  <mat-sidenav #sidenav mode="side" opened>
+    <mat-nav-list>
+      <a mat-list-item routerLink="/">🏠 Nhân viên</a>
+      <a mat-list-item routerLink="/checkin">ℹ️ Chấm công</a>
+      <a mat-list-item routerLink="/department">🏢 Phòng ban</a>
+      <a mat-list-item routerLink="/position">👔 Chức vụ</a>
+      <a mat-list-item routerLink="/devices">💻 Thiết bị</a>
+    </mat-nav-list>
+  </mat-sidenav>
+
+  <!-- Nội dung chính -->
+  <mat-sidenav-content>
+    <mat-toolbar color="primary">
+      <button mat-icon-button (click)="sidenav.toggle()">
+        <mat-icon>menu</mat-icon>
+      </button>
+      <span style="font-size: 18px; font-weight: bold;">Hệ thống quản lý nhân viên</span>
+    </mat-toolbar>
+    <div class="content">
+      <router-outlet></router-outlet>
+    </div>
+  </mat-sidenav-content>
+</mat-sidenav-container>
+<div class="demo" *ngIf="isShowDemo" style="z-index: 100000;">
+  <div class="demo-content" >
+    <div class="demo-header">
+      <h3>Hết hạn sử dụng ! Vui lòng liên hệ để được hỗ trợ</h3>
+    </div>
+  </div>
+</div>
+

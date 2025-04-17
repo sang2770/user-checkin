@@ -1,0 +1,37 @@
+<h2 mat-dialog-title>{{ data.id ? 'Sửa' : 'Thêm' }} Nhân Viên</h2>
+<form [formGroup]="employeeForm">
+    <div mat-dialog-content>
+        <mat-form-field appearance="outline" style="width: 100%;">
+            <mat-label>Mã nhân viên</mat-label>
+            <input matInput formControlName="code">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" style="width: 100%;">
+            <mat-label>Họ và Tên</mat-label>
+            <input matInput formControlName="name">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" style="width: 100%;">
+            <mat-label>Bộ phận</mat-label>
+            <mat-select formControlName="departmentId">
+                <mat-option *ngFor="let department of departments" [value]="department.id">
+                    {{department.name}}
+                </mat-option>
+            </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" style="width: 100%;">
+            <mat-label>Chức vụ</mat-label>
+            <mat-select formControlName="positionId">
+                <mat-option *ngFor="let position of positions" [value]="position.id">
+                    {{position.name}}
+                </mat-option>
+            </mat-select>
+        </mat-form-field>
+    </div>
+
+    <div mat-dialog-actions>
+        <button mat-button (click)="onCancel()">Hủy</button>
+        <button mat-raised-button color="primary" [disabled]="employeeForm.invalid" (click)="onSave()">Lưu</button>
+    </div>
+</form>

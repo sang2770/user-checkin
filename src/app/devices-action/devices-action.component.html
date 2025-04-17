@@ -1,0 +1,76 @@
+<h2 mat-dialog-title>{{ data.id ? 'Sửa' : 'Thêm' }} Thiết Bị</h2>
+
+<form [formGroup]="deviceForm">
+    <div mat-dialog-content style="max-height: 60vh; overflow: auto;">
+
+        <mat-form-field appearance="outline" style="width: 100%;">
+            <mat-label>Tên</mat-label>
+            <input matInput formControlName="name" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" style="width: 100%;">
+            <mat-label>Số Serial</mat-label>
+            <input matInput formControlName="serial_number" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" style="width: 100%;">
+            <mat-label>Khu vực</mat-label>
+            <input matInput formControlName="area" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" style="width: 100%;">
+            <mat-label>Địa chỉ IP</mat-label>
+            <input matInput formControlName="ip_address" />
+        </mat-form-field>
+
+        <div style="margin-bottom: 20px;">
+            <mat-slide-toggle formControlName="status" color="primary">
+                Trạng thái hoạt động
+            </mat-slide-toggle>
+        </div>
+
+
+
+        <mat-form-field appearance="outline" style="width: 100%;">
+            <mat-label>Hoạt động lần cuối</mat-label>
+            <input matInput type="datetime-local" formControlName="last_active">
+        </mat-form-field>
+
+
+        <mat-form-field appearance="outline" style="width: 100%;">
+            <mat-label>Người dùng</mat-label>
+            <input matInput formControlName="user" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" style="width: 100%;">
+            <mat-label>Vân tay</mat-label>
+            <input matInput formControlName="fingerprint" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" style="width: 100%;">
+            <mat-label>Khuôn mặt</mat-label>
+            <input matInput formControlName="face" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" style="width: 100%;">
+            <mat-label>Lòng bàn tay</mat-label>
+            <input matInput formControlName="palm" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" style="width: 100%;">
+            <mat-label>Sự kiện</mat-label>
+            <input matInput formControlName="event" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" style="width: 100%;">
+            <mat-label>Lệnh</mat-label>
+            <input matInput formControlName="command" />
+        </mat-form-field>
+
+    </div>
+
+    <div mat-dialog-actions align="end">
+        <button mat-button (click)="onCancel()">Hủy</button>
+        <button mat-raised-button color="primary" [disabled]="deviceForm.invalid" (click)="onSave()">Lưu</button>
+    </div>
+</form>
