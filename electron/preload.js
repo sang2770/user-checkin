@@ -21,6 +21,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   deleteAttendance: (id) => ipcRenderer.invoke('deleteAttendance', id),
   updateAttendance: (id, attendanceData) => ipcRenderer.invoke('updateAttendance', id, attendanceData),
   deleteAttendancesByIds: (ids) => ipcRenderer.invoke('deleteAttendancesByIds', ids),
+  deleteAllAttendance: () => ipcRenderer.invoke('deleteAllAttendance'),
 
   getDevices: () => ipcRenderer.invoke('getDevices'),
   addDevice: (device) => ipcRenderer.invoke('addDevice', device),

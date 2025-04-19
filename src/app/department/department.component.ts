@@ -1,4 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
+import { MatPaginator } from '@angular/material/paginator';
 import { MatDialog } from '@angular/material/dialog';
 import { MatTableDataSource } from '@angular/material/table';
 import { IEmployee, IDepartment } from '../models/user.model';
@@ -12,10 +13,16 @@ import { DepartmentActionComponent } from '../department-action/department-actio
 export class DepartmentComponent implements OnInit {
   displayedColumns: string[] = ['stt', 'code', 'name', 'actions'];
   dataSource = new MatTableDataSource<IDepartment>([]);
+
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
   constructor(private dialog: MatDialog) { }
 
   async ngOnInit() {
     await this.loadDepartments();
+  }
+
+  ngAfterViewInit() {
+    this.dataSource.paginator = this.paginator;
   }
 
   async loadDepartments() {

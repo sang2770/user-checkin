@@ -42,6 +42,7 @@
         <button mat-raised-button color="primary"><label for="fileInput">Import Chấm Công</label></button>
         <button mat-raised-button color="primary" (click)="exportAttendance()">Export Chấm Công</button>
         <button mat-raised-button color="danger" (click)="deleteMultiAttendance()">Xóa Chấm Công</button>
+        <button mat-raised-button color="danger" (click)="deleteAll()">Xóa tất cả chấm công</button>
     </div>
 
 
@@ -128,4 +129,9 @@
         <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
         <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
     </table>
+    <mat-paginator [pageSizeOptions]="[30, 50, 70, 100]" style="margin-top: 50px;" showFirstLastButtons 
+    [pageIndex]="filter.page" 
+    [pageSize]="filter.limit"
+    [length]="totalItems"
+    (page)="changePage($event)"></mat-paginator>
 </div>

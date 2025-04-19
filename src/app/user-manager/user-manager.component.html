@@ -74,4 +74,5 @@
         <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
         <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
     </table>
+    <mat-paginator style="margin-top: 50px;" [pageSizeOptions]="[30, 50, 70, 100]" aria-label="Chọn trang" showFirstLastButtons></mat-paginator>
 </div>

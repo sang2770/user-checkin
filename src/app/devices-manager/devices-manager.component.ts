@@ -1,7 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatTableDataSource } from '@angular/material/table';
-import { DepartmentActionComponent } from '../department-action/department-action.component';
+import { MatPaginator } from '@angular/material/paginator';
 import { IDevice } from '../models/user.model';
 import { DevicesActionComponent } from '../devices-action/devices-action.component';
 
@@ -17,10 +17,15 @@ export class DevicesManagerComponent implements OnInit {
   ];
   dataSource = new MatTableDataSource<IDevice>([]);
 
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
   constructor(private dialog: MatDialog) { }
 
   async ngOnInit() {
     await this.loadDevices();
+  }
+
+  ngAfterViewInit() {
+    this.dataSource.paginator = this.paginator;
   }
 
   async loadDevices() {

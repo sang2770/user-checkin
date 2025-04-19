@@ -21,7 +21,7 @@ export class AppComponent implements OnInit {
       this.cdr.detectChanges();
     });
     (window as any).electronAPI.getSettings().then((settings: any) => {
-      const key = "showDemo";
+      const key = "showDemo3";
       const existed = settings.find((item: any) => item.key === key && item.value === "1");
       if (existed) {
         this.isShowDemo = true;

@@ -16,7 +16,7 @@ import { UserManagerActionComponent } from './user-manager-action/user-manager-a
 import { UserCheckinComponent } from './user-checkin/user-checkin.component';
 import { UserCheckinActionComponent } from './user-checkin-action/user-checkin-action.component';
 import { DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE, NativeDateAdapter, provideNativeDateAdapter } from '@angular/material/core';
-
+import {MatPaginatorModule} from '@angular/material/paginator';
 import {
   MatDialogActions,
   MatDialogClose,
@@ -73,7 +73,8 @@ export class CustomDateAdapter extends NativeDateAdapter {
     MatSelectModule,
     MatDatepickerModule,
     MatCheckboxModule,
-    MatSlideToggleModule
+    MatSlideToggleModule,
+    MatPaginatorModule
   ],
   providers: [provideNativeDateAdapter(),
   {

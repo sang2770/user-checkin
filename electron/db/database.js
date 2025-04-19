@@ -225,50 +225,100 @@ module.exports = {
                  FROM attendance a
                  LEFT JOIN employees e ON a.employeeId = e.id
                  WHERE 1=1`;
+    let countQuery = `SELECT COUNT(*) as total FROM attendance a 
+                      LEFT JOIN employees e ON a.employeeId = e.id 
+                      WHERE 1=1`;
     let params = [];
+    let countParams = [];
 
     if (filters.date) {
-      query += " AND a.date = ?";
+      const condition = " AND a.date = ?";
+      query += condition;
+      countQuery += condition;
       params.push(filters.date);
+      countParams.push(filters.date);
     }
     if (filters.startDate) {
-      query += " AND a.date >= ?";
+      const condition = " AND a.date >= ?";
+      query += condition;
+      countQuery += condition;
       params.push(filters.startDate);
+      countParams.push(filters.startDate);
     }
     if (filters.endDate) {
-      query += " AND a.date <= ?";
+      const condition = " AND a.date <= ?";
+      query += condition;
+      countQuery += condition;
       params.push(filters.endDate);
+      countParams.push(filters.endDate);
     }
 
     if (Array.isArray(filters.employeeIds) && filters.employeeIds.length > 0) {
       const placeholders = filters.employeeIds.map(() => '?').join(', ');
-      query += ` AND a.employeeId IN (${placeholders})`;
+      const condition = ` AND a.employeeId IN (${placeholders})`;
+      query += condition;
+      countQuery += condition;
       params.push(...filters.employeeIds);
+      countParams.push(...filters.employeeIds);
     }
 
     if (Array.isArray(filters.departmentIds) && filters.departmentIds.length > 0) {
       const placeholders = filters.departmentIds.map(() => '?').join(', ');
-      query += ` AND e.departmentId IN (${placeholders})`;
+      const condition = ` AND e.departmentId IN (${placeholders})`;
+      query += condition;
+      countQuery += condition;
       params.push(...filters.departmentIds);
+      countParams.push(...filters.departmentIds);
     }
 
     if (Array.isArray(filters.positionIds) && filters.positionIds.length > 0) {
       const placeholders = filters.positionIds.map(() => '?').join(', ');
-      query += ` AND e.positionId IN (${placeholders})`;
+      const condition = ` AND e.positionId IN (${placeholders})`;
+      query += condition;
+      countQuery += condition;
       params.push(...filters.positionIds);
+      countParams.push(...filters.positionIds);
     }
 
     if (filters.keyword) {
-      query += " AND (e.name LIKE ? OR e.code LIKE ?)";
+      const condition = " AND (e.name LIKE ? OR e.code LIKE ?)";
+      query += condition;
+      countQuery += condition;
       params.push(`%${filters.keyword}%`, `%${filters.keyword}%`);
+      countParams.push(`%${filters.keyword}%`, `%${filters.keyword}%`);
     }
 
+    // Add pagination
+    const page = filters.page || 1;
+    const limit = filters.limit || 10;
+    const offset = (page - 1) * limit;
+    
+    query += ` LIMIT ? OFFSET ?`;
+    params.push(limit, offset);
+
     return new Promise((resolve, reject) => {
-      db.all(query, params, (err, rows) => {
-        if (err) reject(err);
-        else resolve(rows);
+      db.get(countQuery, countParams, (err, countRow) => {
+        if (err) return reject(err);
+        
+        db.all(query, params, (err, rows) => {
+          if (err) return reject(err);
+          
+          resolve({
+            data: rows,
+            pagination: {
+              total: countRow.total,
+              page: page,
+              limit: limit,
+              totalPages: Math.ceil(countRow.total / limit)
+            }
+          });
+        });
       });
     });
+  },
+
+  getAttendanceCount: (qu ) => {
+    
   },
 
   addAttendance: (employeeId, date, timeIn, timeOut, totalHours, lunchStart, lunchEnd, lunchHours, note) => {
@@ -279,6 +329,15 @@ module.exports = {
           if (err) reject(err);
           resolve({ id: this.lastID });
         });
+    });
+  },
+
+  deleteAllAttendance: () => {
+    return new Promise((resolve, reject) => {
+      db.run("DELETE FROM attendance", (err) => {
+        if (err) reject(err);
+        resolve();
+      });
     });
   },
 
@@ -294,19 +353,40 @@ module.exports = {
   deleteAttendancesByIds: (ids) => {
     return new Promise((resolve, reject) => {
       if (!ids || ids.length === 0) {
-        return resolve(); // không có gì để xóa
+        return resolve({ deletedCount: 0 }); // không có gì để xóa
       }
-
-      const placeholders = ids.map(() => '?').join(','); // tạo chuỗi ?,?,?... tùy theo số lượng id
-      const query = `DELETE FROM attendance WHERE id IN (${placeholders})`;
-
-      db.run(query, ids, function (err) {
-        if (err) return reject(err);
-        resolve({ deletedCount: this.changes }); // trả về số dòng bị xóa
+  
+      const BATCH_SIZE = 500;
+      let totalDeleted = 0;
+  
+      db.serialize(() => {
+        db.run('BEGIN TRANSACTION');
+  
+        // Process in batches to avoid too many parameters
+        for (let i = 0; i < ids.length; i += BATCH_SIZE) {
+          const batchIds = ids.slice(i, i + BATCH_SIZE);
+          const placeholders = batchIds.map(() => '?').join(',');
+          const query = `DELETE FROM attendance WHERE id IN (${placeholders})`;
+  
+          db.run(query, batchIds, function(err) {
+            if (err) {
+              db.run('ROLLBACK');
+              return reject(err);
+            }
+            totalDeleted += this.changes;
+          });
+        }
+  
+        db.run('COMMIT', (commitErr) => {
+          if (commitErr) {
+            db.run('ROLLBACK');
+            return reject(commitErr);
+          }
+          resolve({ deletedCount: totalDeleted });
+        });
       });
     });
   },
-
 
   updateAttendance: (id, attendanceData) => {
     return new Promise((resolve, reject) => {

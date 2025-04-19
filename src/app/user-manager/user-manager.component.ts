@@ -1,8 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { UserManagerActionComponent } from '../user-manager-action/user-manager-action.component';
 import { IDepartment, IEmployee, IPosition } from '../models/user.model';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatDialog } from '@angular/material/dialog';
+import { MatPaginator } from '@angular/material/paginator';
 
 @Component({
   selector: 'app-user-manager',
@@ -20,6 +21,8 @@ export class UserManagerComponent implements OnInit {
     positionId?: number;
   } = {};
 
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
+
   constructor(private dialog: MatDialog) { }
 
   async ngOnInit() {
@@ -28,14 +31,15 @@ export class UserManagerComponent implements OnInit {
     this.loadEmployees();
   }
 
-  loadEmployees() {
+  ngAfterViewInit() {
+    this.dataSource.paginator = this.paginator;
+  }
 
+  loadEmployees() {
     (window as any).electronAPI.getEmployees(this.filter).then((employees: IEmployee[]) => {
       employees.forEach((employee: IEmployee) => {
         employee.department = this.departmentList.find(department => department.id === employee.departmentId);
         employee.position = this.positionList.find(position => position.id === employee.positionId);
-        console.log(employee);
-
       })
 
       this.dataSource.data = employees;

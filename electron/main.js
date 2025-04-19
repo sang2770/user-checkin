@@ -55,7 +55,10 @@ ipcMain.handle('updatePosition', async (_, id, code, name) => await db.updatePos
 
 
 ipcMain.handle('getAttendance', async (_, filters) => {
-  const dataList = await db.getAttendance(filters);
+  const attendancePages = await db.getAttendance(filters);
+  
+  const dataList = attendancePages.data;
+  
   const employeeList = await db.getEmployees({});
   const departmentList = await db.getDepartments();
   const positionList = await db.getPositions();
@@ -64,10 +67,15 @@ ipcMain.handle('getAttendance', async (_, filters) => {
     employee.position = positionList.find(position => position.id === employee.positionId);
   });
 
-  return dataList.map(item => ({
-    ...item,
-    employee: employeeList.find(employee => employee.id === item.employeeId)
-  }));
+  return {
+    data: dataList.map(item => ({
+      ...item,
+      employee: employeeList.find(employee => employee.id === item.employeeId)
+    })),
+    total: attendancePages.pagination.total,
+    page: attendancePages.page,
+    limit: attendancePages.limit
+  }
 });
 ipcMain.handle('addAttendance', async (_, attendanceData) => {
   return await db.addAttendance(attendanceData.employeeId, attendanceData.date, attendanceData.timeIn, attendanceData.timeOut,
@@ -77,6 +85,9 @@ ipcMain.handle('addAttendance', async (_, attendanceData) => {
 ipcMain.handle('deleteAttendance', async (_, id) => await db.deleteAttendance(id))
 ipcMain.handle('deleteAttendancesByIds', async (_, ids) => await db.deleteAttendancesByIds(ids));
 ipcMain.handle('updateAttendance', async (_, id, attendanceData) => await db.updateAttendance(id, attendanceData));
+ipcMain.handle('deleteAllAttendance', async (_, filters) => {
+  return await db.deleteAllAttendance(filters);
+})
 ipcMain.handle('importAttendance', async (_, attendanceList) => {
   const BATCH_SIZE = 500;
   const employeeList = await db.getEmployees({});
