@@ -54,7 +54,7 @@ export class UserCheckinComponent implements OnInit {
   changePage(event: any) {
     this.filter.page = event.pageIndex + 1;
     this.filter.limit = event.pageSize;
-    this.loadAttendance();
+    this.loadAttendance(false);
   }
 
   async loadDepartments() {
@@ -79,10 +79,11 @@ export class UserCheckinComponent implements OnInit {
     this.positionList = await (window as any).electronAPI.getPositions();
   }
 
-  loadAttendance() {
+  loadAttendance(resetPagination = true) {
     const paginatedFilter = {
       ...this.filter,
       keyword: this.filter.keyword?.trim() || '',
+      page: resetPagination ? 1 : this.filter.page,
     };
 
     (window as any).electronAPI
