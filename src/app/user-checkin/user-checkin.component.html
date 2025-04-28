@@ -5,7 +5,7 @@
     <div class="d-flex" style="gap: 10px">
         <mat-form-field appearance="outline" style="min-width: 30%;">
             <mat-label>Tìm kiếm</mat-label>
-            <input matInput [(ngModel)]="filter.keyword" (keyup)="loadAttendance()"
+            <input matInput [(ngModel)]="filter.keyword" (ngModelChange)="search()"
                 placeholder="Nhập tên hoặc mã nhân viên">
         </mat-form-field>
         <mat-form-field>

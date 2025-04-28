@@ -78,6 +78,14 @@ export class UserCheckinComponent implements OnInit {
     this.positionList = await (window as any).electronAPI.getPositions();
   }
 
+  search() {
+    this.filter = {
+      ...this.filter,
+      page: 1
+    };
+    this.loadAttendance();
+  }
+
   loadAttendance() {
     const paginatedFilter = {
       ...this.filter,

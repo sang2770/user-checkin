@@ -21,13 +21,19 @@ export class AppComponent implements OnInit {
       this.cdr.detectChanges();
     });
     (window as any).electronAPI.getSettings().then((settings: any) => {
-      const key = "showDemo3";
-      const existed = settings.find((item: any) => item.key === key && item.value === "1");
+      const key = "expriedDate";
+      const existed = settings.find((item: any) => item.key === key && item.value);
+      const now = new Date();
       if (existed) {
-        this.isShowDemo = true;
+        const expriedDate = new Date(JSON.parse(existed.value));
+        if (expriedDate <= now) {
+          this.isShowDemo = true;
+        }
       } else {
         this.isShowDemo = false;
-        (window as any).electronAPI.setSetting(key, true);
+        const tomorrow = new Date();
+        tomorrow.setDate(now.getDate() + 1);
+        (window as any).electronAPI.setSetting(key, JSON.stringify(tomorrow));
       }
     });
   }
