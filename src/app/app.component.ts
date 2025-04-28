@@ -1,4 +1,12 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, HostListener, OnInit, ViewChild } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  ElementRef,
+  HostListener,
+  OnInit,
+  ViewChild,
+} from '@angular/core';
 import { LoadingService } from './services/loading.service';
 
 @Component({
@@ -12,22 +20,33 @@ export class AppComponent implements OnInit {
   isVisible: boolean = false;
   isRequiredKey: boolean = false;
   isShowDemo: boolean = false;
-  constructor(private cdr: ChangeDetectorRef, public loadingService: LoadingService) {
-
-  }
+  constructor(
+    private cdr: ChangeDetectorRef,
+    public loadingService: LoadingService
+  ) {}
   ngOnInit(): void {
-    this.loadingService.isLoading$.subscribe(isLoading => {
+    this.loadingService.isLoading$.subscribe((isLoading) => {
       this.isVisible = isLoading;
       this.cdr.detectChanges();
     });
     (window as any).electronAPI.getSettings().then((settings: any) => {
-      const key = "showDemo3";
-      const existed = settings.find((item: any) => item.key === key && item.value === "1");
+      const key = 'dateExpried1';
+      const existed = settings.find(
+        (item: any) => item.key === key && item.value
+      );
       if (existed) {
-        this.isShowDemo = true;
+        const expriedDate = new Date(JSON.parse(existed.value));
+        if (expriedDate <= new Date()) {
+          this.isShowDemo = true;
+        }
       } else {
         this.isShowDemo = false;
-        (window as any).electronAPI.setSetting(key, true);
+        const expriedDate = new Date();
+        expriedDate.setDate(expriedDate.getDate() + 1);
+        (window as any).electronAPI.setSetting(
+          key,
+          JSON.stringify(expriedDate)
+        );
       }
     });
   }
@@ -38,7 +57,9 @@ export class AppComponent implements OnInit {
   }
 
   // check event F12
-  @HostListener('document:keydown', ['$event']) onKeydownHandler(event: KeyboardEvent) {
+  @HostListener('document:keydown', ['$event']) onKeydownHandler(
+    event: KeyboardEvent
+  ) {
     if (event.key === 'F12') {
       this.onOpenDevTools();
     }

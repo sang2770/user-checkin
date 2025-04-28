@@ -49,22 +49,16 @@
     <table mat-table [dataSource]="attendanceData" class="mat-elevation-z8">
         <ng-container matColumnDef="select">
             <th mat-header-cell *matHeaderCellDef>
-              <mat-checkbox
-                (change)="$event ? masterToggle() : null"
-                [checked]="isAllSelected()"
-                [indeterminate]="selection.hasValue() && !isAllSelected()"
-              >
-              </mat-checkbox>
+                <mat-checkbox (change)="$event ? masterToggle() : null" [checked]="isAllSelected()"
+                    [indeterminate]="selection.hasValue() && !isAllSelected()">
+                </mat-checkbox>
             </th>
             <td mat-cell *matCellDef="let row">
-              <mat-checkbox
-                (click)="$event.stopPropagation()"
-                (change)="$event ? selection.toggle(row) : null"
-                [checked]="selection.isSelected(row)"
-              >
-              </mat-checkbox>
+                <mat-checkbox (click)="$event.stopPropagation()" (change)="$event ? selection.toggle(row) : null"
+                    [checked]="selection.isSelected(row)">
+                </mat-checkbox>
             </td>
-          </ng-container>
+        </ng-container>
         <ng-container matColumnDef="employeeCode">
             <th mat-header-cell *matHeaderCellDef style="text-align: center;"> Mã Nhân viên </th>
             <td mat-cell *matCellDef="let row" style="text-align: center;"> {{ row.employee?.code }} </td>
@@ -86,7 +80,7 @@
 
         <ng-container matColumnDef="date">
             <th mat-header-cell *matHeaderCellDef> Ngày </th>
-            <td mat-cell *matCellDef="let row"> {{ row.date | date:'dd/MM/yyyy' }} </td>
+            <td mat-cell *matCellDef="let row"> {{ row.date }} </td>
         </ng-container>
 
         <ng-container matColumnDef="dayWeek">
@@ -129,9 +123,7 @@
         <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
         <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
     </table>
-    <mat-paginator [pageSizeOptions]="[30, 50, 70, 100]" style="margin-top: 50px;" showFirstLastButtons 
-    [pageIndex]="filter.page" 
-    [pageSize]="filter.limit"
-    [length]="totalItems"
-    (page)="changePage($event)"></mat-paginator>
+    <mat-paginator [pageSizeOptions]="[30, 50, 70, 100]" style="margin-top: 50px;" showFirstLastButtons
+        [pageIndex]="filter.page" [pageSize]="filter.limit" [length]="totalItems"
+        (page)="changePage($event)"></mat-paginator>
 </div>

@@ -37,6 +37,7 @@ export class UserCheckinComponent implements OnInit {
     endDate: new Date(),
     page: 1,
     limit: 30,
+    keyword: '',
   };
   totalItems: number = 0;
   departmentList: IDepartment[] = [];
@@ -81,21 +82,22 @@ export class UserCheckinComponent implements OnInit {
   loadAttendance() {
     const paginatedFilter = {
       ...this.filter,
+      keyword: this.filter.keyword?.trim() || '',
     };
 
     (window as any).electronAPI
       .getAttendance(paginatedFilter)
-      .then((response: any) => {        
+      .then((response: any) => {
         this.attendanceData.data = response.data ?? [];
         this.totalItems = response.total ?? 0;
+        console.log(this.attendanceData.data);
       })
       .catch((err: any) =>
         console.error('Lỗi khi tải danh sách chấm công:', err)
       );
   }
 
-  ngAfterViewInit() {
-  }
+  ngAfterViewInit() {}
 
   // Rest of the code remains the same as it's working correctly
   // Only fixed the issues mentioned above:
@@ -170,7 +172,8 @@ export class UserCheckinComponent implements OnInit {
       return;
     }
 
-    const headers = data[2];
+    const headers = data[1];
+
     if (!headers) {
       this._snackBar.open('File Excel không đúng định dạng!', 'Đóng', {
         duration: 3000,
@@ -185,10 +188,13 @@ export class UserCheckinComponent implements OnInit {
       ),
       employeeName: headers.findIndex(
         (h: string) =>
+          h?.toLocaleLowerCase() == 'Nhân viên'.toLocaleLowerCase() ||
           h?.toLocaleLowerCase() == 'Tên nhân viên'.toLocaleLowerCase()
       ),
       departmentName: headers.findIndex(
-        (h: string) => h?.toLocaleLowerCase() == 'Bộ Phận'.toLocaleLowerCase()
+        (h: string) =>
+          h?.toLocaleLowerCase() == 'Phòng ban'.toLocaleLowerCase() ||
+          h?.toLocaleLowerCase() == 'Bộ phận'.toLocaleLowerCase()
       ),
       date: headers.findIndex(
         (h: string) => h?.toLocaleLowerCase() == 'Ngày'.toLocaleLowerCase()
@@ -253,7 +259,7 @@ export class UserCheckinComponent implements OnInit {
     };
 
     const attendanceList = data
-      .slice(3)
+      .slice(2)
       .filter((row) => {
         // Skip if row is empty or has no employee code
         if (!row || !row.length || !row[indexMap['employeeCode']]) return false;
@@ -436,7 +442,7 @@ export class UserCheckinComponent implements OnInit {
       SheetNames: ['Chấm công'],
     };
 
-    const worksheetData = [[], [title], headers];
+    const worksheetData = [[[]], [title], headers];
 
     const worksheet: XLSX.WorkSheet = XLSX.utils.aoa_to_sheet(worksheetData);
 
@@ -449,43 +455,68 @@ export class UserCheckinComponent implements OnInit {
 
     workbook.Sheets['Chấm công'] = worksheet;
 
-    const BATCH_SIZE = 1000;
-    const totalItems = this.attendanceData.data.length;
+    // Tạo bản sao của bộ lọc hiện tại nhưng loại bỏ các tham số phân trang
+    const exportFilter = { ...this.filter };
+    delete exportFilter.page;
+    delete exportFilter.limit;
 
-    this._snackBar.open(`Đang xuất ${totalItems} bản ghi...`, 'Đóng', {
+    this._snackBar.open(`Đang chuẩn bị xuất dữ liệu...`, 'Đóng', {
       duration: 2000,
     });
 
-    for (let i = 0; i < totalItems; i += BATCH_SIZE) {
-      const batchEnd = Math.min(i + BATCH_SIZE, totalItems);
-      const batchData = this.attendanceData.data
-        .slice(i, batchEnd)
-        .map((row) => [
-          row.employee?.code || '',
-          row.employee?.name || '',
-          row.employee?.department?.name || '',
-          row.employee?.position?.name || '',
-          row.date ? this.formatDate(row.date) : '',
-          row.date ? this.getWeekDay(row.date) : '',
-          row.timeIn || '',
-          row.lunchStart || '',
-          row.lunchEnd || '',
-          row.timeOut || '',
-        ]);
+    // Lấy tất cả dữ liệu phù hợp với bộ lọc
+    (window as any).electronAPI
+      .getAttendance(exportFilter)
+      .then((response: any) => {
+        const allData = response.data || [];
+        console.log(allData);
 
-      XLSX.utils.sheet_add_aoa(worksheet, batchData, { origin: 3 + i });
-    }
+        const totalItems = allData.length;
 
-    const excelBuffer: any = XLSX.write(workbook, {
-      bookType: 'xlsx',
-      type: 'array',
-    });
+        this._snackBar.open(`Đang xuất ${totalItems} bản ghi...`, 'Đóng', {
+          duration: 2000,
+        });
 
-    const data: Blob = new Blob([excelBuffer], {
-      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8',
-    });
+        const BATCH_SIZE = 1000;
+        for (let i = 0; i < totalItems; i += BATCH_SIZE) {
+          const batchEnd = Math.min(i + BATCH_SIZE, totalItems);
+          const batchData = allData
+            .slice(i, batchEnd)
+            .map((row: any) => [
+              row.employee?.code || '',
+              row.employee?.name || '',
+              row.employee?.department?.name || '',
+              row.employee?.position?.name || '',
+              row.date ? this.formatDate(row.date) : '',
+              row.date ? this.getWeekDay(row.date) : '',
+              row.timeIn || '',
+              row.lunchStart || '',
+              row.lunchEnd || '',
+              row.timeOut || '',
+            ]);
 
-    FileSaver.saveAs(data, 'ChamCong.xlsx');
-    this._snackBar.open('Xuất dữ liệu thành công', 'Đóng', { duration: 3000 });
+          XLSX.utils.sheet_add_aoa(worksheet, batchData, { origin: 3 + i });
+        }
+
+        const excelBuffer: any = XLSX.write(workbook, {
+          bookType: 'xlsx',
+          type: 'array',
+        });
+
+        const data: Blob = new Blob([excelBuffer], {
+          type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8',
+        });
+
+        FileSaver.saveAs(data, 'ChamCong.xlsx');
+        this._snackBar.open(
+          `Đã xuất ${totalItems} bản ghi thành công`,
+          'Đóng',
+          { duration: 3000 }
+        );
+      })
+      .catch((err: any) => {
+        console.error('Lỗi khi xuất dữ liệu:', err);
+        this._snackBar.open('Lỗi khi xuất dữ liệu', 'Đóng', { duration: 3000 });
+      });
   }
 }

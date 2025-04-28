@@ -1,12 +1,12 @@
-const { Database } = require('sqlite3').verbose();
-const { app } = require('electron');
-const path = require('path');
-const dbPath = path.join(app.getPath('userData'), 'employees.db');
+const { Database } = require("sqlite3").verbose();
+const { app } = require("electron");
+const path = require("path");
+const dbPath = path.join(app.getPath("userData"), "employees.db");
 const db = new Database(dbPath, (err) => {
   if (err) {
-    console.error('Error opening database:', err.message);
+    console.error("Error opening database:", err.message);
   } else {
-    console.log('Connected to the SQLite database.');
+    console.log("Connected to the SQLite database.");
   }
 });
 db.serialize(() => {
@@ -90,23 +90,27 @@ module.exports = {
   },
   addPosition: (code, name) => {
     return new Promise((resolve, reject) => {
-      db.run("INSERT INTO positions (code, name) VALUES (?, ?)",
+      db.run(
+        "INSERT INTO positions (code, name) VALUES (?, ?)",
         [code, name],
         function (err) {
           if (err) reject(err);
           resolve({ id: this.lastID });
-        });
+        }
+      );
     });
   },
 
   updatePosition: (id, code, name) => {
     return new Promise((resolve, reject) => {
-      db.run("UPDATE positions SET code = ?, name = ? WHERE id = ?",
+      db.run(
+        "UPDATE positions SET code = ?, name = ? WHERE id = ?",
         [code, name, id],
         (err) => {
           if (err) reject(err);
           resolve();
-        });
+        }
+      );
     });
   },
 
@@ -129,23 +133,27 @@ module.exports = {
 
   addDepartment: (code, name) => {
     return new Promise((resolve, reject) => {
-      db.run("INSERT INTO departments (code, name) VALUES (?, ?)",
+      db.run(
+        "INSERT INTO departments (code, name) VALUES (?, ?)",
         [code, name],
         function (err) {
           if (err) reject(err);
           resolve({ id: this.lastID });
-        });
+        }
+      );
     });
   },
 
   updateDepartment: (id, code, name) => {
     return new Promise((resolve, reject) => {
-      db.run("UPDATE departments SET code = ?, name = ? WHERE id = ?",
+      db.run(
+        "UPDATE departments SET code = ?, name = ? WHERE id = ?",
         [code, name, id],
         (err) => {
           if (err) reject(err);
           resolve();
-        });
+        }
+      );
     });
   },
 
@@ -179,7 +187,6 @@ module.exports = {
       params.push(filters.ids);
     }
 
-
     return new Promise((resolve, reject) => {
       db.all(query, params, (err, rows) => {
         if (err) reject(err);
@@ -190,12 +197,14 @@ module.exports = {
 
   addEmployee: (code, name, departmentId, positionId) => {
     return new Promise((resolve, reject) => {
-      db.run("INSERT INTO employees (code, name, departmentId, positionId) VALUES (?, ?, ?, ?)",
+      db.run(
+        "INSERT INTO employees (code, name, departmentId, positionId) VALUES (?, ?, ?, ?)",
         [code, name, departmentId, positionId],
         function (err) {
           if (err) reject(err);
           resolve({ id: this.lastID });
-        });
+        }
+      );
     });
   },
 
@@ -210,12 +219,14 @@ module.exports = {
 
   updateEmployee: (id, code, name, departmentId, positionId) => {
     return new Promise((resolve, reject) => {
-      db.run("UPDATE employees SET code = ?, name = ?, departmentId = ?, positionId = ? WHERE id = ?",
+      db.run(
+        "UPDATE employees SET code = ?, name = ?, departmentId = ?, positionId = ? WHERE id = ?",
         [code, name, departmentId, positionId, id],
         (err) => {
           if (err) reject(err);
           resolve();
-        });
+        }
+      );
     });
   },
 
@@ -239,6 +250,8 @@ module.exports = {
       countParams.push(filters.date);
     }
     if (filters.startDate) {
+      const vnDate = new Date(filters.startDate.getTime() + 7 * 60 * 60 * 1000);
+      filters.startDate = vnDate.toISOString().split("T")[0];
       const condition = " AND a.date >= ?";
       query += condition;
       countQuery += condition;
@@ -246,6 +259,10 @@ module.exports = {
       countParams.push(filters.startDate);
     }
     if (filters.endDate) {
+      filters.endDate = new Date(
+        filters.endDate.getTime() + 7 * 60 * 60 * 1000
+      );
+      filters.endDate = filters.endDate.toISOString().split("T")[0];
       const condition = " AND a.date <= ?";
       query += condition;
       countQuery += condition;
@@ -254,7 +271,7 @@ module.exports = {
     }
 
     if (Array.isArray(filters.employeeIds) && filters.employeeIds.length > 0) {
-      const placeholders = filters.employeeIds.map(() => '?').join(', ');
+      const placeholders = filters.employeeIds.map(() => "?").join(", ");
       const condition = ` AND a.employeeId IN (${placeholders})`;
       query += condition;
       countQuery += condition;
@@ -262,8 +279,11 @@ module.exports = {
       countParams.push(...filters.employeeIds);
     }
 
-    if (Array.isArray(filters.departmentIds) && filters.departmentIds.length > 0) {
-      const placeholders = filters.departmentIds.map(() => '?').join(', ');
+    if (
+      Array.isArray(filters.departmentIds) &&
+      filters.departmentIds.length > 0
+    ) {
+      const placeholders = filters.departmentIds.map(() => "?").join(", ");
       const condition = ` AND e.departmentId IN (${placeholders})`;
       query += condition;
       countQuery += condition;
@@ -272,7 +292,7 @@ module.exports = {
     }
 
     if (Array.isArray(filters.positionIds) && filters.positionIds.length > 0) {
-      const placeholders = filters.positionIds.map(() => '?').join(', ');
+      const placeholders = filters.positionIds.map(() => "?").join(", ");
       const condition = ` AND e.positionId IN (${placeholders})`;
       query += condition;
       countQuery += condition;
@@ -288,47 +308,72 @@ module.exports = {
       countParams.push(`%${filters.keyword}%`, `%${filters.keyword}%`);
     }
 
+    console.log("Qurty:", query, params);
+    let page = 1;
+    let limit = 10;
     // Add pagination
-    const page = filters.page || 1;
-    const limit = filters.limit || 10;
-    const offset = (page - 1) * limit;
-    
-    query += ` LIMIT ? OFFSET ?`;
-    params.push(limit, offset);
+    if (filters.page !== undefined && filters.limit !== undefined) {
+      page = filters.page || 1;
+      limit = filters.limit || 10;
+      const offset = (page - 1) * limit;
+
+      query += ` LIMIT ? OFFSET ?`;
+      params.push(limit, offset);
+    }
 
     return new Promise((resolve, reject) => {
       db.get(countQuery, countParams, (err, countRow) => {
         if (err) return reject(err);
-        
+
         db.all(query, params, (err, rows) => {
           if (err) return reject(err);
-          
+
           resolve({
             data: rows,
             pagination: {
               total: countRow.total,
               page: page,
               limit: limit,
-              totalPages: Math.ceil(countRow.total / limit)
-            }
+              totalPages: Math.ceil(countRow.total / limit),
+            },
           });
         });
       });
     });
   },
 
-  getAttendanceCount: (qu ) => {
-    
-  },
+  getAttendanceCount: (qu) => {},
 
-  addAttendance: (employeeId, date, timeIn, timeOut, totalHours, lunchStart, lunchEnd, lunchHours, note) => {
+  addAttendance: (
+    employeeId,
+    date,
+    timeIn,
+    timeOut,
+    totalHours,
+    lunchStart,
+    lunchEnd,
+    lunchHours,
+    note
+  ) => {
     return new Promise((resolve, reject) => {
-      db.run("INSERT INTO attendance (employeeId, date, timeIn, timeOut, totalHours, lunchStart, lunchEnd, lunchHours, note) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-        [employeeId, date, timeIn, timeOut, totalHours, lunchStart, lunchEnd, lunchHours, note],
+      db.run(
+        "INSERT INTO attendance (employeeId, date, timeIn, timeOut, totalHours, lunchStart, lunchEnd, lunchHours, note) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        [
+          employeeId,
+          date,
+          timeIn,
+          timeOut,
+          totalHours,
+          lunchStart,
+          lunchEnd,
+          lunchHours,
+          note,
+        ],
         function (err) {
           if (err) reject(err);
           resolve({ id: this.lastID });
-        });
+        }
+      );
     });
   },
 
@@ -355,31 +400,31 @@ module.exports = {
       if (!ids || ids.length === 0) {
         return resolve({ deletedCount: 0 }); // không có gì để xóa
       }
-  
+
       const BATCH_SIZE = 500;
       let totalDeleted = 0;
-  
+
       db.serialize(() => {
-        db.run('BEGIN TRANSACTION');
-  
+        db.run("BEGIN TRANSACTION");
+
         // Process in batches to avoid too many parameters
         for (let i = 0; i < ids.length; i += BATCH_SIZE) {
           const batchIds = ids.slice(i, i + BATCH_SIZE);
-          const placeholders = batchIds.map(() => '?').join(',');
+          const placeholders = batchIds.map(() => "?").join(",");
           const query = `DELETE FROM attendance WHERE id IN (${placeholders})`;
-  
-          db.run(query, batchIds, function(err) {
+
+          db.run(query, batchIds, function (err) {
             if (err) {
-              db.run('ROLLBACK');
+              db.run("ROLLBACK");
               return reject(err);
             }
             totalDeleted += this.changes;
           });
         }
-  
-        db.run('COMMIT', (commitErr) => {
+
+        db.run("COMMIT", (commitErr) => {
           if (commitErr) {
-            db.run('ROLLBACK');
+            db.run("ROLLBACK");
             return reject(commitErr);
           }
           resolve({ deletedCount: totalDeleted });
@@ -390,12 +435,25 @@ module.exports = {
 
   updateAttendance: (id, attendanceData) => {
     return new Promise((resolve, reject) => {
-      db.run("UPDATE attendance SET employeeId = ?, date = ?, timeIn = ?, timeOut = ?, totalHours = ?, lunchStart = ?, lunchEnd = ?, lunchHours = ?, note = ? WHERE id = ?",
-        [attendanceData.employeeId, attendanceData.date, attendanceData.timeIn, attendanceData.timeOut, attendanceData.totalHours, attendanceData.lunchStart, attendanceData.lunchEnd, attendanceData.lunchHours, attendanceData.note, id],
+      db.run(
+        "UPDATE attendance SET employeeId = ?, date = ?, timeIn = ?, timeOut = ?, totalHours = ?, lunchStart = ?, lunchEnd = ?, lunchHours = ?, note = ? WHERE id = ?",
+        [
+          attendanceData.employeeId,
+          attendanceData.date,
+          attendanceData.timeIn,
+          attendanceData.timeOut,
+          attendanceData.totalHours,
+          attendanceData.lunchStart,
+          attendanceData.lunchEnd,
+          attendanceData.lunchHours,
+          attendanceData.note,
+          id,
+        ],
         (err) => {
           if (err) reject(err);
           resolve();
-        });
+        }
+      );
     });
   },
 
@@ -403,45 +461,93 @@ module.exports = {
     return new Promise((resolve, reject) => {
       const BATCH_SIZE = 500;
       const totalBatches = Math.ceil(attendanceList.length / BATCH_SIZE);
-      let processedBatches = 0;
+
+      if (
+        !attendanceList ||
+        !Array.isArray(attendanceList) ||
+        attendanceList.length === 0
+      ) {
+        return reject(new Error("Invalid or empty attendance list"));
+      }
 
       db.serialize(() => {
-        db.run('BEGIN TRANSACTION');
-        const stmt = db.prepare(`INSERT INTO attendance
-          (employeeId, date, timeIn, timeOut, totalHours, lunchStart, lunchEnd, lunchHours, note)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`);
+        db.run("BEGIN TRANSACTION");
 
-        for (let i = 0; i < totalBatches; i++) {
-          const batch = attendanceList.slice(i, i + BATCH_SIZE);
-          for (const item of batch) {
-            stmt.run([
-              item.employeeId,
-              item.date,
-              item.timeIn,
-              item.timeOut,
-              item.totalHours,
-              item.lunchStart,
-              item.lunchEnd,
-              item.lunchHours,
-              item.note
-            ]);
-          }
-          processedBatches++;
-        }
+        // Chuẩn bị câu lệnh INSERT với nhiều giá trị
+        const placeholders = "(?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        const stmt = db.prepare(`INSERT OR IGNORE INTO attendance 
+          (employeeId, date, timeIn, timeOut, totalHours, lunchStart, lunchEnd, lunchHours, note) 
+          VALUES ${placeholders}`);
 
-        stmt.finalize((err) => {
-          if (err) {
-            db.run('ROLLBACK');
-            return reject(err);
-          }
-          db.run('COMMIT', (commitErr) => {
-            if (commitErr) {
-              db.run('ROLLBACK');
-              return reject(commitErr);
+        let insertedCount = 0;
+
+        try {
+          for (let i = 0; i < totalBatches; i++) {
+            const batch = attendanceList.slice(
+              i * BATCH_SIZE,
+              (i + 1) * BATCH_SIZE
+            );
+
+            for (const item of batch) {
+              // Kiểm tra dữ liệu đầu vào
+              if (!item.employeeId || !item.date) {
+                console.warn(
+                  `Skipping invalid item: employeeId=${item.employeeId}, date=${item.date}`
+                );
+                continue;
+              }
+
+              // Chèn bản ghi
+              stmt.run(
+                [
+                  item.employeeId,
+                  item.date,
+                  item.timeIn || null,
+                  item.timeOut || null,
+                  item.totalHours || null,
+                  item.lunchStart || null,
+                  item.lunchEnd || null,
+                  item.lunchHours || null,
+                  item.note || null,
+                ],
+                (err) => {
+                  if (err) {
+                    console.error(
+                      `Error inserting attendance for employeeId=${item.employeeId}:`,
+                      err
+                    );
+                  } else {
+                    insertedCount++;
+                  }
+                }
+              );
             }
-            resolve();
+          }
+
+          stmt.finalize((err) => {
+            if (err) {
+              db.run("ROLLBACK");
+              return reject(
+                new Error(`Failed to finalize statement: ${err.message}`)
+              );
+            }
+
+            db.run("COMMIT", (commitErr) => {
+              if (commitErr) {
+                db.run("ROLLBACK");
+                return reject(
+                  new Error(
+                    `Failed to commit transaction: ${commitErr.message}`
+                  )
+                );
+              }
+              resolve({ insertedCount, total: attendanceList.length });
+            });
           });
-        });
+        } catch (error) {
+          db.run("ROLLBACK");
+          reject(new Error(`Transaction failed: ${error.message}`));
+        }
       });
     });
   },
@@ -457,12 +563,14 @@ module.exports = {
 
   setSetting: (key, value) => {
     return new Promise((resolve, reject) => {
-      db.run("INSERT INTO settings (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = ?",
+      db.run(
+        "INSERT INTO settings (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = ?",
         [key, value, value],
         (err) => {
           if (err) reject(err);
           resolve();
-        });
+        }
+      );
     });
   },
   getDevices: () => {
@@ -477,7 +585,8 @@ module.exports = {
   // Thêm thiết bị mới
   addDevice: (device) => {
     return new Promise((resolve, reject) => {
-      db.run(`
+      db.run(
+        `
         INSERT INTO devices (
           name, serial_number, area, ip_address, status, last_active,
           user, fingerprint, face, palm, event, command
@@ -494,19 +603,21 @@ module.exports = {
           device.face,
           device.palm,
           device.event,
-          device.command
+          device.command,
         ],
         function (err) {
           if (err) reject(err);
           resolve({ id: this.lastID });
-        });
+        }
+      );
     });
   },
 
   // Cập nhật thiết bị
   updateDevice: (id, device) => {
     return new Promise((resolve, reject) => {
-      db.run(`
+      db.run(
+        `
         UPDATE devices SET
           name = ?, serial_number = ?, area = ?, ip_address = ?, status = ?, last_active = ?,
           user = ?, fingerprint = ?, face = ?, palm = ?, event = ?, command = ?
@@ -524,12 +635,13 @@ module.exports = {
           device.palm,
           device.event,
           device.command,
-          id
+          id,
         ],
         (err) => {
           if (err) reject(err);
           resolve();
-        });
+        }
+      );
     });
   },
 
@@ -541,5 +653,5 @@ module.exports = {
         resolve();
       });
     });
-  }
+  },
 };
