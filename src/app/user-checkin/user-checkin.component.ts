@@ -26,8 +26,8 @@ export class UserCheckinComponent implements OnInit {
     'dayWeek',
     'timeIn',
     'lunchStart',
-    'timeOut',
     'lunchEnd',
+    'timeOut',
     'actions',
   ];
   selection = new SelectionModel<IAttendance>(true, []); // Fixed type to IAttendance
@@ -170,7 +170,7 @@ export class UserCheckinComponent implements OnInit {
 
     reader.readAsBinaryString(target.files[0]);
   }
-  importAttendance(data: any[]) {
+  importAttendance(data: any[]) {    
     if (data.length < 2) {
       this._snackBar.open('File Excel không có dữ liệu!', 'Đóng', {
         duration: 3000,
@@ -207,10 +207,10 @@ export class UserCheckinComponent implements OnInit {
       lunchStart: headers.findIndex(
         (h: string) => h?.toLocaleLowerCase() == 'Ra 1'.toLocaleLowerCase()
       ),
-      timeOut: headers.findIndex(
+      lunchEnd: headers.findIndex(
         (h: string) => h?.toLocaleLowerCase() == 'Vào 2'.toLocaleLowerCase()
       ),
-      lunchEnd: headers.findIndex(
+      timeOut: headers.findIndex(
         (h: string) => h?.toLocaleLowerCase() == 'Ra 2'.toLocaleLowerCase()
       ),
     };

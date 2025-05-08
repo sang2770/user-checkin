@@ -12,16 +12,16 @@
             <mat-label>Ngày</mat-label>
             <mat-date-range-input [rangePicker]="picker">
                 <input matStartDate [(ngModel)]="filter.startDate" placeholder="Start date"
-                    (ngModelChange)="loadAttendance()">
+                    (ngModelChange)="search()">
                 <input matEndDate [(ngModel)]="filter.endDate" placeholder="End date"
-                    (ngModelChange)="loadAttendance()">
+                    (ngModelChange)="search()">
             </mat-date-range-input>
             <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
             <mat-date-range-picker #picker></mat-date-range-picker>
         </mat-form-field>
         <mat-form-field appearance="outline">
             <mat-label>Bộ phận</mat-label>
-            <mat-select [(ngModel)]="filter.departmentIds" multiple (ngModelChange)="loadAttendance()">
+            <mat-select [(ngModel)]="filter.departmentIds" multiple (ngModelChange)="search()">
                 <mat-option *ngFor="let department of departmentList" [value]="department.id">
                     {{department.name}}
                 </mat-option>
@@ -29,7 +29,7 @@
         </mat-form-field>
         <mat-form-field appearance="outline">
             <mat-label>Chức vụ</mat-label>
-            <mat-select [(ngModel)]="filter.positionIds" multiple (ngModelChange)="loadAttendance()">
+            <mat-select [(ngModel)]="filter.positionIds" multiple (ngModelChange)="search()">
                 <mat-option *ngFor="let position of positionList" [value]="position.id">
                     {{position.name}}
                 </mat-option>

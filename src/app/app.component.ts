@@ -21,7 +21,7 @@ export class AppComponent implements OnInit {
       this.cdr.detectChanges();
     });
     (window as any).electronAPI.getSettings().then((settings: any) => {
-      const key = "expriedDate";
+      const key = "expriedDate1";
       const existed = settings.find((item: any) => item.key === key && item.value);
       const now = new Date();
       if (existed) {
