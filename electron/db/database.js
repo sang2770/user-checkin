@@ -230,7 +230,7 @@ module.exports = {
                       WHERE 1=1`;
     let params = [];
     let countParams = [];
-
+    
     if (filters.date) {
       const condition = " AND a.date = ?";
       query += condition;
@@ -238,19 +238,24 @@ module.exports = {
       params.push(filters.date);
       countParams.push(filters.date);
     }
+    const formatDate = (isoString) => {
+      return new Date(isoString).toISOString().split("T")[0]; // "2025-04-30"
+    };
     if (filters.startDate) {
+      const startDate = formatDate(filters.startDate);
       const condition = " AND a.date >= ?";
       query += condition;
       countQuery += condition;
-      params.push(filters.startDate);
-      countParams.push(filters.startDate);
+      params.push(startDate);
+      countParams.push(startDate);
     }
     if (filters.endDate) {
+      const endDate = formatDate(filters.endDate);
       const condition = " AND a.date <= ?";
       query += condition;
       countQuery += condition;
-      params.push(filters.endDate);
-      countParams.push(filters.endDate);
+      params.push(endDate);
+      countParams.push(endDate);
     }
 
     if (Array.isArray(filters.employeeIds) && filters.employeeIds.length > 0) {
@@ -399,7 +404,7 @@ module.exports = {
     });
   },
 
-  importAttendance: (attendanceList) => {
+  importAttendance: (attendanceList) => {    
     return new Promise((resolve, reject) => {
       const BATCH_SIZE = 500;
       const totalBatches = Math.ceil(attendanceList.length / BATCH_SIZE);
@@ -411,7 +416,7 @@ module.exports = {
           (employeeId, date, timeIn, timeOut, totalHours, lunchStart, lunchEnd, lunchHours, note)
           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`);
 
-        for (let i = 0; i < totalBatches; i++) {
+        for (let i = 0; i < totalBatches; i+= BATCH_SIZE) {
           const batch = attendanceList.slice(i, i + BATCH_SIZE);
           for (const item of batch) {
             stmt.run([

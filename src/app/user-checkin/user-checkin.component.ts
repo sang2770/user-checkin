@@ -81,14 +81,18 @@ export class UserCheckinComponent implements OnInit {
   search() {
     this.filter = {
       ...this.filter,
-      page: 1
+      page: 0
     };
+    if (this.filter.keyword) {
+      this.filter.keyword = this.filter.keyword.trim();
+    }
     this.loadAttendance();
   }
 
   loadAttendance() {
     const paginatedFilter = {
       ...this.filter,
+      page: this.filter.page + 1
     };
 
     (window as any).electronAPI
@@ -176,8 +180,7 @@ export class UserCheckinComponent implements OnInit {
         duration: 3000,
       });
       return;
-    }
-
+    }    
     const headers = data[2];
     if (!headers) {
       this._snackBar.open('File Excel không đúng định dạng!', 'Đóng', {
@@ -294,6 +297,8 @@ export class UserCheckinComponent implements OnInit {
       .importAttendance(attendanceList)
       .then(() => {
         this.loadAttendance();
+        this.loadDepartments();
+        this.loadPositions();
         this._snackBar.open(
           `Import thành công ${attendanceList.length} bản ghi`,
           'Đóng',
