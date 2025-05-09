@@ -42,7 +42,7 @@ export class UserCheckinComponent implements OnInit {
   departmentList: IDepartment[] = [];
   positionList: IPosition[] = [];
 
-  constructor(private dialog: MatDialog) {}
+  constructor(private dialog: MatDialog) { }
 
   async ngOnInit() {
     await this.loadDepartments();
@@ -97,9 +97,10 @@ export class UserCheckinComponent implements OnInit {
 
     (window as any).electronAPI
       .getAttendance(paginatedFilter)
-      .then((response: any) => {        
+      .then((response: any) => {
         this.attendanceData.data = response.data ?? [];
         this.totalItems = response.total ?? 0;
+        
       })
       .catch((err: any) =>
         console.error('Lỗi khi tải danh sách chấm công:', err)
@@ -180,7 +181,7 @@ export class UserCheckinComponent implements OnInit {
         duration: 3000,
       });
       return;
-    }    
+    }
     const headers = data[2];
     if (!headers) {
       this._snackBar.open('File Excel không đúng định dạng!', 'Đóng', {
@@ -292,7 +293,7 @@ export class UserCheckinComponent implements OnInit {
     }
 
     this._snackBar.open('Đang xử lý dữ liệu...', 'Đóng', { duration: 2000 });
-
+    
     (window as any).electronAPI
       .importAttendance(attendanceList)
       .then(() => {
@@ -321,16 +322,16 @@ export class UserCheckinComponent implements OnInit {
     return day === 0
       ? 'Chủ nhật'
       : day === 1
-      ? 'Thứ hai'
-      : day === 2
-      ? 'Thứ ba'
-      : day === 3
-      ? 'Thứ tư'
-      : day === 4
-      ? 'Thứ năm'
-      : day === 5
-      ? 'Thứ sáu'
-      : 'Thứ bảy';
+        ? 'Thứ hai'
+        : day === 2
+          ? 'Thứ ba'
+          : day === 3
+            ? 'Thứ tư'
+            : day === 4
+              ? 'Thứ năm'
+              : day === 5
+                ? 'Thứ sáu'
+                : 'Thứ bảy';
   }
 
   formatDate(date: string | Date): string {
@@ -430,75 +431,95 @@ export class UserCheckinComponent implements OnInit {
   }
 
   exportAttendance() {
-    const title = 'BẢNG CHẤM CÔNG';
-    const headers = [
-      'Mã Nhân viên',
-      'Nhân viên',
-      'Phòng ban',
-      'Chức vụ',
-      'Ngày',
-      'Thứ',
-      'Giờ vào 1',
-      'Giờ ra 1',
-      'Giờ vào 2',
-      'Giờ ra 2',
-    ];
-
-    const workbook: XLSX.WorkBook = {
-      Sheets: { 'Chấm công': {} as XLSX.WorkSheet },
-      SheetNames: ['Chấm công'],
+    const paginatedFilter = {
+      ...this.filter,
+      page: 1,
+      limit: this.totalItems
     };
 
-    const worksheetData = [[], [title], headers];
+    (window as any).electronAPI
+      .getAttendance(paginatedFilter)
+      .then((response: any) => {
 
-    const worksheet: XLSX.WorkSheet = XLSX.utils.aoa_to_sheet(worksheetData);
+        
+        const attendanceData: IAttendance[] = response.data ?? [];
 
-    worksheet['!merges'] = [
-      {
-        s: { r: 1, c: 0 },
-        e: { r: 1, c: headers.length - 1 },
-      },
-    ];
+        const title = 'BẢNG CHẤM CÔNG';
+        const headers = [
+          'Mã Nhân viên',
+          'Nhân viên',
+          'Phòng ban',
+          'Chức vụ',
+          'Ngày',
+          'Thứ',
+          'Giờ vào 1',
+          'Giờ ra 1',
+          'Giờ vào 2',
+          'Giờ ra 2',
+        ];
 
-    workbook.Sheets['Chấm công'] = worksheet;
+        const workbook: XLSX.WorkBook = {
+          Sheets: { 'Chấm công': {} as XLSX.WorkSheet },
+          SheetNames: ['Chấm công'],
+        };
 
-    const BATCH_SIZE = 1000;
-    const totalItems = this.attendanceData.data.length;
+        const worksheetData = [[], [title], headers];
 
-    this._snackBar.open(`Đang xuất ${totalItems} bản ghi...`, 'Đóng', {
-      duration: 2000,
-    });
+        const worksheet: XLSX.WorkSheet = XLSX.utils.aoa_to_sheet(worksheetData);
 
-    for (let i = 0; i < totalItems; i += BATCH_SIZE) {
-      const batchEnd = Math.min(i + BATCH_SIZE, totalItems);
-      const batchData = this.attendanceData.data
-        .slice(i, batchEnd)
-        .map((row) => [
-          row.employee?.code || '',
-          row.employee?.name || '',
-          row.employee?.department?.name || '',
-          row.employee?.position?.name || '',
-          row.date ? this.formatDate(row.date) : '',
-          row.date ? this.getWeekDay(row.date) : '',
-          row.timeIn || '',
-          row.lunchStart || '',
-          row.lunchEnd || '',
-          row.timeOut || '',
-        ]);
+        worksheet['!merges'] = [
+          {
+            s: { r: 1, c: 0 },
+            e: { r: 1, c: headers.length - 1 },
+          },
+        ];
 
-      XLSX.utils.sheet_add_aoa(worksheet, batchData, { origin: 3 + i });
-    }
+        workbook.Sheets['Chấm công'] = worksheet;
 
-    const excelBuffer: any = XLSX.write(workbook, {
-      bookType: 'xlsx',
-      type: 'array',
-    });
 
-    const data: Blob = new Blob([excelBuffer], {
-      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8',
-    });
+        const BATCH_SIZE = 1000;
+        const totalItems = attendanceData.length;
 
-    FileSaver.saveAs(data, 'ChamCong.xlsx');
-    this._snackBar.open('Xuất dữ liệu thành công', 'Đóng', { duration: 3000 });
+        this._snackBar.open(`Đang xuất ${totalItems} bản ghi...`, 'Đóng', {
+          duration: 2000,
+        });
+
+        for (let i = 0; i < totalItems; i += BATCH_SIZE) {
+          const batchEnd = Math.min(i + BATCH_SIZE, totalItems);
+          const batchData = attendanceData
+            .slice(i, batchEnd)
+            .map((row) => [
+              row.employee?.code || '',
+              row.employee?.name || '',
+              row.employee?.department?.name || '',
+              row.employee?.position?.name || '',
+              row.date ? this.formatDate(row.date) : '',
+              row.date ? this.getWeekDay(row.date) : '',
+              row.timeIn || '',
+              row.lunchStart || '',
+              row.lunchEnd || '',
+              row.timeOut || '',
+            ]);
+
+          XLSX.utils.sheet_add_aoa(worksheet, batchData, { origin: 3 + i });
+        }
+
+        const excelBuffer: any = XLSX.write(workbook, {
+          bookType: 'xlsx',
+          type: 'array',
+        });
+
+        const data: Blob = new Blob([excelBuffer], {
+          type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8',
+        });
+
+        FileSaver.saveAs(data, 'ChamCong.xlsx');
+        this._snackBar.open('Xuất dữ liệu thành công', 'Đóng', { duration: 3000 });
+
+      })
+      .catch((err: any) =>
+        console.error('Lỗi khi tải danh sách chấm công:', err)
+      );
+
   }
 }

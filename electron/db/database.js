@@ -225,7 +225,7 @@ module.exports = {
                  FROM attendance a
                  LEFT JOIN employees e ON a.employeeId = e.id
                  WHERE 1=1`;
-    let countQuery = `SELECT COUNT(*) as total FROM attendance a 
+    let countQuery = `SELECT COUNT(DISTINCT a.id) as total FROM attendance a 
                       LEFT JOIN employees e ON a.employeeId = e.id 
                       WHERE 1=1`;
     let params = [];
@@ -307,6 +307,8 @@ module.exports = {
         
         db.all(query, params, (err, rows) => {
           if (err) return reject(err);
+
+          console.log("countRow", countRow);
           
           resolve({
             data: rows,
@@ -406,9 +408,6 @@ module.exports = {
 
   importAttendance: (attendanceList) => {    
     return new Promise((resolve, reject) => {
-      const BATCH_SIZE = 500;
-      const totalBatches = Math.ceil(attendanceList.length / BATCH_SIZE);
-      let processedBatches = 0;
 
       db.serialize(() => {
         db.run('BEGIN TRANSACTION');
@@ -416,9 +415,7 @@ module.exports = {
           (employeeId, date, timeIn, timeOut, totalHours, lunchStart, lunchEnd, lunchHours, note)
           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`);
 
-        for (let i = 0; i < totalBatches; i+= BATCH_SIZE) {
-          const batch = attendanceList.slice(i, i + BATCH_SIZE);
-          for (const item of batch) {
+          for (const item of attendanceList) {
             stmt.run([
               item.employeeId,
               item.date,
@@ -431,8 +428,6 @@ module.exports = {
               item.note
             ]);
           }
-          processedBatches++;
-        }
 
         stmt.finalize((err) => {
           if (err) {

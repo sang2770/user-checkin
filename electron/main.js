@@ -66,7 +66,8 @@ ipcMain.handle('getAttendance', async (_, filters) => {
     employee.department = departmentList.find(department => department.id === employee.departmentId);
     employee.position = positionList.find(position => position.id === employee.positionId);
   });
-
+  console.log('attendancePages', attendancePages.pagination);
+  
   return {
     data: dataList.map(item => ({
       ...item,
@@ -102,6 +103,7 @@ ipcMain.handle('importAttendance', async (_, attendanceList) => {
   
   for (let i = 0; i < attendanceList.length; i += BATCH_SIZE) {
     const batch = attendanceList.slice(i, i + BATCH_SIZE);
+    
     for (const item of batch) {
       let department = departmentMap.get(item.departmentName);
       if (!department && item.departmentName?.length > 0) {
