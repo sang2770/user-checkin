@@ -53,6 +53,19 @@ db.serialize(() => {
             FOREIGN KEY(employeeId) REFERENCES employees(id) ON DELETE CASCADE
         )
     `);
+
+  // Add new columns for Ra 3 and Vào 3 if they don't exist
+  db.run(`ALTER TABLE attendance ADD COLUMN timeOut2 TEXT`, (err) => {
+    if (err && !err.message.includes('duplicate column name')) {
+      console.error('Error adding timeOut2 column:', err.message);
+    }
+  });
+
+  db.run(`ALTER TABLE attendance ADD COLUMN timeIn2 TEXT`, (err) => {
+    if (err && !err.message.includes('duplicate column name')) {
+      console.error('Error adding timeIn2 column:', err.message);
+    }
+  });
   db.run(`
         CREATE TABLE IF NOT EXISTS settings (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -230,7 +243,7 @@ module.exports = {
                       WHERE 1=1`;
     let params = [];
     let countParams = [];
-    
+
     if (filters.date) {
       const condition = " AND a.date = ?";
       query += condition;
@@ -297,19 +310,19 @@ module.exports = {
     const page = filters.page || 1;
     const limit = filters.limit || 10;
     const offset = (page - 1) * limit;
-    
+
     query += ` LIMIT ? OFFSET ?`;
     params.push(limit, offset);
 
     return new Promise((resolve, reject) => {
       db.get(countQuery, countParams, (err, countRow) => {
         if (err) return reject(err);
-        
+
         db.all(query, params, (err, rows) => {
           if (err) return reject(err);
 
           console.log("countRow", countRow);
-          
+
           resolve({
             data: rows,
             pagination: {
@@ -324,14 +337,14 @@ module.exports = {
     });
   },
 
-  getAttendanceCount: (qu ) => {
-    
+  getAttendanceCount: (qu) => {
+
   },
 
-  addAttendance: (employeeId, date, timeIn, timeOut, totalHours, lunchStart, lunchEnd, lunchHours, note) => {
+  addAttendance: (employeeId, date, timeIn, timeOut, totalHours, lunchStart, lunchEnd, lunchHours, note, timeOut2, timeIn2) => {
     return new Promise((resolve, reject) => {
-      db.run("INSERT INTO attendance (employeeId, date, timeIn, timeOut, totalHours, lunchStart, lunchEnd, lunchHours, note) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-        [employeeId, date, timeIn, timeOut, totalHours, lunchStart, lunchEnd, lunchHours, note],
+      db.run("INSERT INTO attendance (employeeId, date, timeIn, timeOut, totalHours, lunchStart, lunchEnd, lunchHours, note, timeOut2, timeIn2) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        [employeeId, date, timeIn, timeOut, totalHours, lunchStart, lunchEnd, lunchHours, note, timeOut2, timeIn2],
         function (err) {
           if (err) reject(err);
           resolve({ id: this.lastID });
@@ -362,20 +375,20 @@ module.exports = {
       if (!ids || ids.length === 0) {
         return resolve({ deletedCount: 0 }); // không có gì để xóa
       }
-  
+
       const BATCH_SIZE = 500;
       let totalDeleted = 0;
-  
+
       db.serialize(() => {
         db.run('BEGIN TRANSACTION');
-  
+
         // Process in batches to avoid too many parameters
         for (let i = 0; i < ids.length; i += BATCH_SIZE) {
           const batchIds = ids.slice(i, i + BATCH_SIZE);
           const placeholders = batchIds.map(() => '?').join(',');
           const query = `DELETE FROM attendance WHERE id IN (${placeholders})`;
-  
-          db.run(query, batchIds, function(err) {
+
+          db.run(query, batchIds, function (err) {
             if (err) {
               db.run('ROLLBACK');
               return reject(err);
@@ -383,7 +396,7 @@ module.exports = {
             totalDeleted += this.changes;
           });
         }
-  
+
         db.run('COMMIT', (commitErr) => {
           if (commitErr) {
             db.run('ROLLBACK');
@@ -397,8 +410,8 @@ module.exports = {
 
   updateAttendance: (id, attendanceData) => {
     return new Promise((resolve, reject) => {
-      db.run("UPDATE attendance SET employeeId = ?, date = ?, timeIn = ?, timeOut = ?, totalHours = ?, lunchStart = ?, lunchEnd = ?, lunchHours = ?, note = ? WHERE id = ?",
-        [attendanceData.employeeId, attendanceData.date, attendanceData.timeIn, attendanceData.timeOut, attendanceData.totalHours, attendanceData.lunchStart, attendanceData.lunchEnd, attendanceData.lunchHours, attendanceData.note, id],
+      db.run("UPDATE attendance SET employeeId = ?, date = ?, timeIn = ?, timeOut = ?, totalHours = ?, lunchStart = ?, lunchEnd = ?, lunchHours = ?, note = ?, timeOut2 = ?, timeIn2 = ? WHERE id = ?",
+        [attendanceData.employeeId, attendanceData.date, attendanceData.timeIn, attendanceData.timeOut, attendanceData.totalHours, attendanceData.lunchStart, attendanceData.lunchEnd, attendanceData.lunchHours, attendanceData.note, attendanceData.timeOut2, attendanceData.timeIn2, id],
         (err) => {
           if (err) reject(err);
           resolve();
@@ -406,28 +419,30 @@ module.exports = {
     });
   },
 
-  importAttendance: (attendanceList) => {    
+  importAttendance: (attendanceList) => {
     return new Promise((resolve, reject) => {
 
       db.serialize(() => {
         db.run('BEGIN TRANSACTION');
         const stmt = db.prepare(`INSERT INTO attendance
-          (employeeId, date, timeIn, timeOut, totalHours, lunchStart, lunchEnd, lunchHours, note)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`);
+          (employeeId, date, timeIn, timeOut, totalHours, lunchStart, lunchEnd, lunchHours, note, timeOut2, timeIn2)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`);
 
-          for (const item of attendanceList) {
-            stmt.run([
-              item.employeeId,
-              item.date,
-              item.timeIn,
-              item.timeOut,
-              item.totalHours,
-              item.lunchStart,
-              item.lunchEnd,
-              item.lunchHours,
-              item.note
-            ]);
-          }
+        for (const item of attendanceList) {
+          stmt.run([
+            item.employeeId,
+            item.date,
+            item.timeIn,
+            item.timeOut,
+            item.totalHours,
+            item.lunchStart,
+            item.lunchEnd,
+            item.lunchHours,
+            item.note,
+            item.timeOut2,
+            item.timeIn2
+          ]);
+        }
 
         stmt.finalize((err) => {
           if (err) {

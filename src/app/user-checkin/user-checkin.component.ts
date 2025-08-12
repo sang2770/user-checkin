@@ -29,13 +29,15 @@ export class UserCheckinComponent implements OnInit {
     { name: 'lunchStart', displayName: 'Giờ ra 1', visible: true },
     { name: 'lunchEnd', displayName: 'Giờ vào 2', visible: true },
     { name: 'timeOut', displayName: 'Giờ ra 2', visible: true },
+    { name: 'timeOut2', displayName: 'Giờ ra 3', visible: true },
+    { name: 'timeIn2', displayName: 'Giờ vào 3', visible: true },
     { name: 'actions', displayName: 'Hành động', visible: true },
   ];
 
   get displayedColumns(): string[] {
     return this.columnDefinitions
-      .filter(column => column.visible)
-      .map(column => column.name);
+      .filter((column) => column.visible)
+      .map((column) => column.name);
   }
   selection = new SelectionModel<IAttendance>(true, []); // Fixed type to IAttendance
   attendanceData = new MatTableDataSource<IAttendance>([]);
@@ -47,8 +49,8 @@ export class UserCheckinComponent implements OnInit {
   };
   pagination = {
     page: 0,
-    limit: 30
-  }
+    limit: 30,
+  };
   totalItems: number = 0;
   departmentList: IDepartment[] = [];
   positionList: IPosition[] = [];
@@ -59,7 +61,7 @@ export class UserCheckinComponent implements OnInit {
     if (savedColumns) {
       try {
         const columnState = JSON.parse(savedColumns);
-        this.columnDefinitions.forEach(col => {
+        this.columnDefinitions.forEach((col) => {
           if (columnState[col.name] !== undefined) {
             col.visible = columnState[col.name];
           }
@@ -76,7 +78,7 @@ export class UserCheckinComponent implements OnInit {
     this.loadAttendance();
   }
 
-  changePage(event: any) {    
+  changePage(event: any) {
     this.filter.page = event.pageIndex + 1;
     this.filter.limit = event.pageSize;
     this.loadAttendance();
@@ -107,7 +109,7 @@ export class UserCheckinComponent implements OnInit {
   search() {
     this.filter = {
       ...this.filter,
-      page: 1
+      page: 1,
     };
     this.pagination.page = 0;
     if (this.filter.keyword) {
@@ -119,7 +121,7 @@ export class UserCheckinComponent implements OnInit {
   loadAttendance() {
     const paginatedFilter = {
       ...this.filter,
-      page: this.filter.page
+      page: this.filter.page,
     };
 
     (window as any).electronAPI
@@ -127,28 +129,30 @@ export class UserCheckinComponent implements OnInit {
       .then((response: any) => {
         this.attendanceData.data = response.data ?? [];
         this.totalItems = response.total ?? 0;
-
       })
       .catch((err: any) =>
         console.error('Lỗi khi tải danh sách chấm công:', err)
       );
   }
 
-  ngAfterViewInit() {
-  }
+  ngAfterViewInit() {}
 
   // Phương thức kiểm tra xem một cột có đang hiển thị hay không
   isColumnVisible(columnName: string): boolean {
-    const column = this.columnDefinitions.find(col => col.name === columnName);
+    const column = this.columnDefinitions.find(
+      (col) => col.name === columnName
+    );
     return column ? column.visible : false;
   }
 
   // Phương thức toggle hiển thị/ẩn một cột
   toggleColumn(columnName: string): void {
-    const column = this.columnDefinitions.find(col => col.name === columnName);
+    const column = this.columnDefinitions.find(
+      (col) => col.name === columnName
+    );
     if (column) {
       // Không cho phép ẩn cột 'select' và 'actions' vì chúng quan trọng cho chức năng của bảng
-      if ((columnName === 'select') && column.visible) {
+      if (columnName === 'select' && column.visible) {
         return;
       }
       column.visible = !column.visible;
@@ -159,7 +163,10 @@ export class UserCheckinComponent implements OnInit {
         return state;
       }, {} as { [key: string]: boolean });
 
-      localStorage.setItem('attendanceColumnState', JSON.stringify(columnState));
+      localStorage.setItem(
+        'attendanceColumnState',
+        JSON.stringify(columnState)
+      );
     }
   }
 
@@ -222,6 +229,7 @@ export class UserCheckinComponent implements OnInit {
     reader.readAsBinaryString(target.files[0]);
   }
   importAttendance(data: any[]) {
+    console.log('Importing attendance data:', data);
     if (data.length < 2) {
       this._snackBar.open('File Excel không có dữ liệu!', 'Đóng', {
         duration: 3000,
@@ -235,6 +243,10 @@ export class UserCheckinComponent implements OnInit {
       });
       return;
     }
+    headers.forEach((header: string, index: number) => {
+      // remove any special: \n \r \t
+      headers[index] = header.replace(/[\n\r\t]/g, '').trim();
+    });
 
     const indexMap: { [key: string]: number } = {
       employeeCode: headers.findIndex(
@@ -262,6 +274,12 @@ export class UserCheckinComponent implements OnInit {
       ),
       timeOut: headers.findIndex(
         (h: string) => h?.toLocaleLowerCase() == 'Ra 2'.toLocaleLowerCase()
+      ),
+      timeOut2: headers.findIndex(
+        (h: string) => h?.toLocaleLowerCase() == 'Ra 3'.toLocaleLowerCase()
+      ),
+      timeIn2: headers.findIndex(
+        (h: string) => h?.toLocaleLowerCase() == 'Vào 3'.toLocaleLowerCase()
       ),
     };
 
@@ -327,8 +345,10 @@ export class UserCheckinComponent implements OnInit {
         date: row[indexMap['date']],
         timeIn: formatTime(row[indexMap['timeIn']]),
         lunchStart: formatTime(row[indexMap['lunchStart']]),
-        timeOut: formatTime(row[indexMap['timeOut']]),
         lunchEnd: formatTime(row[indexMap['lunchEnd']]),
+        timeOut: formatTime(row[indexMap['timeOut']]),
+        timeOut2: formatTime(row[indexMap['timeOut2']]),
+        timeIn2: formatTime(row[indexMap['timeIn2']]),
       }));
 
     if (attendanceList.length === 0) {
@@ -368,16 +388,16 @@ export class UserCheckinComponent implements OnInit {
     return day === 0
       ? 'Chủ nhật'
       : day === 1
-        ? 'Thứ hai'
-        : day === 2
-          ? 'Thứ ba'
-          : day === 3
-            ? 'Thứ tư'
-            : day === 4
-              ? 'Thứ năm'
-              : day === 5
-                ? 'Thứ sáu'
-                : 'Thứ bảy';
+      ? 'Thứ hai'
+      : day === 2
+      ? 'Thứ ba'
+      : day === 3
+      ? 'Thứ tư'
+      : day === 4
+      ? 'Thứ năm'
+      : day === 5
+      ? 'Thứ sáu'
+      : 'Thứ bảy';
   }
 
   formatDate(date: string | Date): string {
@@ -480,14 +500,12 @@ export class UserCheckinComponent implements OnInit {
     const paginatedFilter = {
       ...this.filter,
       page: 1,
-      limit: this.totalItems
+      limit: this.totalItems,
     };
 
     (window as any).electronAPI
       .getAttendance(paginatedFilter)
       .then((response: any) => {
-
-
         const attendanceData: IAttendance[] = response.data ?? [];
 
         const title = 'BẢNG CHẤM CÔNG';
@@ -502,6 +520,8 @@ export class UserCheckinComponent implements OnInit {
           'Giờ ra 1',
           'Giờ vào 2',
           'Giờ ra 2',
+          'Giờ ra 3',
+          'Giờ vào 3',
         ];
 
         const workbook: XLSX.WorkBook = {
@@ -511,7 +531,8 @@ export class UserCheckinComponent implements OnInit {
 
         const worksheetData = [[], [title], headers];
 
-        const worksheet: XLSX.WorkSheet = XLSX.utils.aoa_to_sheet(worksheetData);
+        const worksheet: XLSX.WorkSheet =
+          XLSX.utils.aoa_to_sheet(worksheetData);
 
         worksheet['!merges'] = [
           {
@@ -521,7 +542,6 @@ export class UserCheckinComponent implements OnInit {
         ];
 
         workbook.Sheets['Chấm công'] = worksheet;
-
 
         const BATCH_SIZE = 1000;
         const totalItems = attendanceData.length;
@@ -545,6 +565,8 @@ export class UserCheckinComponent implements OnInit {
               row.lunchStart || '',
               row.lunchEnd || '',
               row.timeOut || '',
+              row.timeOut2 || '',
+              row.timeIn2 || '',
             ]);
 
           XLSX.utils.sheet_add_aoa(worksheet, batchData, { origin: 3 + i });
@@ -560,12 +582,12 @@ export class UserCheckinComponent implements OnInit {
         });
 
         FileSaver.saveAs(data, 'ChamCong.xlsx');
-        this._snackBar.open('Xuất dữ liệu thành công', 'Đóng', { duration: 3000 });
-
+        this._snackBar.open('Xuất dữ liệu thành công', 'Đóng', {
+          duration: 3000,
+        });
       })
       .catch((err: any) =>
         console.error('Lỗi khi tải danh sách chấm công:', err)
       );
-
   }
 }

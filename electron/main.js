@@ -56,9 +56,9 @@ ipcMain.handle('updatePosition', async (_, id, code, name) => await db.updatePos
 
 ipcMain.handle('getAttendance', async (_, filters) => {
   const attendancePages = await db.getAttendance(filters);
-  
+
   const dataList = attendancePages.data;
-  
+
   const employeeList = await db.getEmployees({});
   const departmentList = await db.getDepartments();
   const positionList = await db.getPositions();
@@ -67,7 +67,7 @@ ipcMain.handle('getAttendance', async (_, filters) => {
     employee.position = positionList.find(position => position.id === employee.positionId);
   });
   console.log('attendancePages', attendancePages.pagination);
-  
+
   return {
     data: dataList.map(item => ({
       ...item,
@@ -80,7 +80,7 @@ ipcMain.handle('getAttendance', async (_, filters) => {
 });
 ipcMain.handle('addAttendance', async (_, attendanceData) => {
   return await db.addAttendance(attendanceData.employeeId, attendanceData.date, attendanceData.timeIn, attendanceData.timeOut,
-    attendanceData.totalHours, attendanceData.lunchStart, attendanceData.lunchEnd, attendanceData.lunchHours, attendanceData.note);
+    attendanceData.totalHours, attendanceData.lunchStart, attendanceData.lunchEnd, attendanceData.lunchHours, attendanceData.note, attendanceData.timeOut2, attendanceData.timeIn2);
 }
 );
 ipcMain.handle('deleteAttendance', async (_, id) => await db.deleteAttendance(id))
@@ -100,7 +100,7 @@ ipcMain.handle('importAttendance', async (_, attendanceList) => {
   const employeeMap = new Map(employeeList.map(emp => [emp.code, emp]));
 
   let processedItems = [];
-  
+
   for (let i = 0; i < attendanceList.length; i += BATCH_SIZE) {
     const batch = attendanceList.slice(i, i + BATCH_SIZE);
     processedItems = [];
