@@ -103,7 +103,7 @@ ipcMain.handle('importAttendance', async (_, attendanceList) => {
   
   for (let i = 0; i < attendanceList.length; i += BATCH_SIZE) {
     const batch = attendanceList.slice(i, i + BATCH_SIZE);
-    
+    processedItems = [];
     for (const item of batch) {
       let department = departmentMap.get(item.departmentName);
       if (!department && item.departmentName?.length > 0) {
@@ -134,9 +134,10 @@ ipcMain.handle('importAttendance', async (_, attendanceList) => {
       item.employeeId = employee?.id;
       processedItems.push(item);
     }
+    await db.importAttendance(processedItems);
   }
 
-  return await db.importAttendance(processedItems);
+  return attendanceList;
 });
 
 

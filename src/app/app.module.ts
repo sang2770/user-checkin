@@ -11,6 +11,7 @@ import { MatTableModule } from '@angular/material/table';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
+import { MatMenuModule } from '@angular/material/menu';
 import { UserManagerComponent } from './user-manager/user-manager.component';
 import { UserManagerActionComponent } from './user-manager-action/user-manager-action.component';
 import { UserCheckinComponent } from './user-checkin/user-checkin.component';
@@ -74,7 +75,8 @@ export class CustomDateAdapter extends NativeDateAdapter {
     MatDatepickerModule,
     MatCheckboxModule,
     MatSlideToggleModule,
-    MatPaginatorModule
+    MatPaginatorModule,
+    MatMenuModule
   ],
   providers: [provideNativeDateAdapter(),
   {

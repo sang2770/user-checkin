@@ -20,22 +20,22 @@ export class AppComponent implements OnInit {
       this.isVisible = isLoading;
       this.cdr.detectChanges();
     });
-    (window as any).electronAPI.getSettings().then((settings: any) => {
-      const key = "expriedDate3";
-      const existed = settings.find((item: any) => item.key === key && item.value);
-      const now = new Date();
-      if (existed) {
-        const expriedDate = new Date(JSON.parse(existed.value));
-        if (expriedDate <= now) {
-          this.isShowDemo = true;
-        }
-      } else {
-        this.isShowDemo = false;
-        const tomorrow = new Date();
-        tomorrow.setDate(now.getDate() + 1);
-        (window as any).electronAPI.setSetting(key, JSON.stringify(tomorrow));
-      }
-    });
+    // (window as any).electronAPI.getSettings().then((settings: any) => {
+    //   const key = "expriedDate3";
+    //   const existed = settings.find((item: any) => item.key === key && item.value);
+    //   const now = new Date();
+    //   if (existed) {
+    //     const expriedDate = new Date(JSON.parse(existed.value));
+    //     if (expriedDate <= now) {
+    //       this.isShowDemo = true;
+    //     }
+    //   } else {
+    //     this.isShowDemo = false;
+    //     const tomorrow = new Date();
+    //     tomorrow.setDate(now.getDate() + 1);
+    //     (window as any).electronAPI.setSetting(key, JSON.stringify(tomorrow));
+    //   }
+    // });
   }
 
   onClose() {

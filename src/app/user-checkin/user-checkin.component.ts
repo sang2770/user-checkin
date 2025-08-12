@@ -8,6 +8,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import * as FileSaver from 'file-saver';
 import { SelectionModel } from '@angular/cdk/collections';
 import { MatTableDataSource } from '@angular/material/table';
+import { MatMenu } from '@angular/material/menu';
 
 @Component({
   selector: 'app-user-checkin',
@@ -16,20 +17,26 @@ import { MatTableDataSource } from '@angular/material/table';
 })
 export class UserCheckinComponent implements OnInit {
   private _snackBar = inject(MatSnackBar);
-  displayedColumns: string[] = [
-    'select',
-    'employeeCode',
-    'employee',
-    'department',
-    'position',
-    'date',
-    'dayWeek',
-    'timeIn',
-    'lunchStart',
-    'lunchEnd',
-    'timeOut',
-    'actions',
+  columnDefinitions = [
+    { name: 'select', displayName: 'Chọn', visible: true },
+    { name: 'employeeCode', displayName: 'Mã Nhân viên', visible: true },
+    { name: 'employee', displayName: 'Nhân viên', visible: true },
+    { name: 'department', displayName: 'Phòng ban', visible: true },
+    { name: 'position', displayName: 'Chức vụ', visible: true },
+    { name: 'date', displayName: 'Ngày', visible: true },
+    { name: 'dayWeek', displayName: 'Thứ', visible: true },
+    { name: 'timeIn', displayName: 'Giờ vào 1', visible: true },
+    { name: 'lunchStart', displayName: 'Giờ ra 1', visible: true },
+    { name: 'lunchEnd', displayName: 'Giờ vào 2', visible: true },
+    { name: 'timeOut', displayName: 'Giờ ra 2', visible: true },
+    { name: 'actions', displayName: 'Hành động', visible: true },
   ];
+
+  get displayedColumns(): string[] {
+    return this.columnDefinitions
+      .filter(column => column.visible)
+      .map(column => column.name);
+  }
   selection = new SelectionModel<IAttendance>(true, []); // Fixed type to IAttendance
   attendanceData = new MatTableDataSource<IAttendance>([]);
   filter: any = {
@@ -38,11 +45,30 @@ export class UserCheckinComponent implements OnInit {
     page: 1,
     limit: 30,
   };
+  pagination = {
+    page: 0,
+    limit: 30
+  }
   totalItems: number = 0;
   departmentList: IDepartment[] = [];
   positionList: IPosition[] = [];
 
-  constructor(private dialog: MatDialog) { }
+  constructor(private dialog: MatDialog) {
+    // Khôi phục trạng thái hiển thị cột từ localStorage nếu có
+    const savedColumns = localStorage.getItem('attendanceColumnState');
+    if (savedColumns) {
+      try {
+        const columnState = JSON.parse(savedColumns);
+        this.columnDefinitions.forEach(col => {
+          if (columnState[col.name] !== undefined) {
+            col.visible = columnState[col.name];
+          }
+        });
+      } catch (e) {
+        console.error('Lỗi khi đọc trạng thái cột từ localStorage:', e);
+      }
+    }
+  }
 
   async ngOnInit() {
     await this.loadDepartments();
@@ -50,7 +76,7 @@ export class UserCheckinComponent implements OnInit {
     this.loadAttendance();
   }
 
-  changePage(event: any) {
+  changePage(event: any) {    
     this.filter.page = event.pageIndex + 1;
     this.filter.limit = event.pageSize;
     this.loadAttendance();
@@ -81,8 +107,9 @@ export class UserCheckinComponent implements OnInit {
   search() {
     this.filter = {
       ...this.filter,
-      page: 0
+      page: 1
     };
+    this.pagination.page = 0;
     if (this.filter.keyword) {
       this.filter.keyword = this.filter.keyword.trim();
     }
@@ -92,7 +119,7 @@ export class UserCheckinComponent implements OnInit {
   loadAttendance() {
     const paginatedFilter = {
       ...this.filter,
-      page: this.filter.page + 1
+      page: this.filter.page
     };
 
     (window as any).electronAPI
@@ -100,7 +127,7 @@ export class UserCheckinComponent implements OnInit {
       .then((response: any) => {
         this.attendanceData.data = response.data ?? [];
         this.totalItems = response.total ?? 0;
-        
+
       })
       .catch((err: any) =>
         console.error('Lỗi khi tải danh sách chấm công:', err)
@@ -110,12 +137,31 @@ export class UserCheckinComponent implements OnInit {
   ngAfterViewInit() {
   }
 
-  // Rest of the code remains the same as it's working correctly
-  // Only fixed the issues mentioned above:
-  // 1. styleUrl -> styleUrls
-  // 2. Selection type to IAttendance
-  // 3. Proper typing for data in loadAttendance
-  // 4. Fixed masterToggle implementation
+  // Phương thức kiểm tra xem một cột có đang hiển thị hay không
+  isColumnVisible(columnName: string): boolean {
+    const column = this.columnDefinitions.find(col => col.name === columnName);
+    return column ? column.visible : false;
+  }
+
+  // Phương thức toggle hiển thị/ẩn một cột
+  toggleColumn(columnName: string): void {
+    const column = this.columnDefinitions.find(col => col.name === columnName);
+    if (column) {
+      // Không cho phép ẩn cột 'select' và 'actions' vì chúng quan trọng cho chức năng của bảng
+      if ((columnName === 'select') && column.visible) {
+        return;
+      }
+      column.visible = !column.visible;
+
+      // Lưu trạng thái hiển thị cột vào localStorage
+      const columnState = this.columnDefinitions.reduce((state, col) => {
+        state[col.name] = col.visible;
+        return state;
+      }, {} as { [key: string]: boolean });
+
+      localStorage.setItem('attendanceColumnState', JSON.stringify(columnState));
+    }
+  }
 
   // The remaining methods are kept as is since they work correctly
   openDialog(data?: any) {
@@ -175,7 +221,7 @@ export class UserCheckinComponent implements OnInit {
 
     reader.readAsBinaryString(target.files[0]);
   }
-  importAttendance(data: any[]) {    
+  importAttendance(data: any[]) {
     if (data.length < 2) {
       this._snackBar.open('File Excel không có dữ liệu!', 'Đóng', {
         duration: 3000,
@@ -293,7 +339,7 @@ export class UserCheckinComponent implements OnInit {
     }
 
     this._snackBar.open('Đang xử lý dữ liệu...', 'Đóng', { duration: 2000 });
-    
+
     (window as any).electronAPI
       .importAttendance(attendanceList)
       .then(() => {
@@ -441,7 +487,7 @@ export class UserCheckinComponent implements OnInit {
       .getAttendance(paginatedFilter)
       .then((response: any) => {
 
-        
+
         const attendanceData: IAttendance[] = response.data ?? [];
 
         const title = 'BẢNG CHẤM CÔNG';
