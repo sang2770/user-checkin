@@ -29,8 +29,8 @@ export class UserCheckinComponent implements OnInit {
     { name: 'lunchStart', displayName: 'Giờ ra 1', visible: true },
     { name: 'lunchEnd', displayName: 'Giờ vào 2', visible: true },
     { name: 'timeOut', displayName: 'Giờ ra 2', visible: true },
-    { name: 'timeOut2', displayName: 'Giờ ra 3', visible: true },
     { name: 'timeIn2', displayName: 'Giờ vào 3', visible: true },
+    { name: 'timeOut2', displayName: 'Giờ ra 3', visible: true },
     { name: 'actions', displayName: 'Hành động', visible: true },
   ];
 
