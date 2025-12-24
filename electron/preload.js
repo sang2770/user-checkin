@@ -34,5 +34,44 @@ contextBridge.exposeInMainWorld('electronAPI', {
 
   getSettings: () => ipcRenderer.invoke('getSettings'),
   setSetting: (key, value) => ipcRenderer.invoke('setSetting', key, value),
+
+  // ================ INVENTORY MANAGEMENT ================
+  
+  // Ingredients
+  getIngredients: () => ipcRenderer.invoke('getIngredients'),
+  createIngredient: (ingredient) => ipcRenderer.invoke('createIngredient', ingredient),
+  updateIngredient: (id, ingredient) => ipcRenderer.invoke('updateIngredient', id, ingredient),
+  deleteIngredient: (id) => ipcRenderer.invoke('deleteIngredient', id),
+
+  // Products
+  getProducts: () => ipcRenderer.invoke('getProducts'),
+  createProduct: (product) => ipcRenderer.invoke('createProduct', product),
+  updateProduct: (id, product) => ipcRenderer.invoke('updateProduct', id, product),
+  deleteProduct: (id) => ipcRenderer.invoke('deleteProduct', id),
+
+  // Recipes
+  getRecipes: () => ipcRenderer.invoke('getRecipes'),
+  getRecipesByProduct: (productId) => ipcRenderer.invoke('getRecipesByProduct', productId),
+  createRecipe: (recipe) => ipcRenderer.invoke('createRecipe', recipe),
+  updateRecipe: (id, recipe) => ipcRenderer.invoke('updateRecipe', id, recipe),
+  deleteRecipe: (id) => ipcRenderer.invoke('deleteRecipe', id),
+
+  // Stock Entries
+  getStockEntries: () => ipcRenderer.invoke('getStockEntries'),
+  createStockEntry: (stockEntry) => ipcRenderer.invoke('createStockEntry', stockEntry),
+
+  // Sales
+  getSaleOrders: () => ipcRenderer.invoke('getSaleOrders'),
+  createSaleOrder: (saleOrder, items) => ipcRenderer.invoke('createSaleOrder', saleOrder, items),
+  getSaleOrderItems: (saleOrderId) => ipcRenderer.invoke('getSaleOrderItems', saleOrderId),
+
+  // Import Sales from Excel
+  importSalesFromExcel: (fileBuffer) => ipcRenderer.invoke('importSalesFromExcel', fileBuffer),
+  clearSalesHistory: () => ipcRenderer.invoke('clearSalesHistory'),
+
+  // Reports
+  getDailyReport: (date) => ipcRenderer.invoke('getDailyReport', date),
+  getInventoryReport: () => ipcRenderer.invoke('getInventoryReport'),
+
 });
 

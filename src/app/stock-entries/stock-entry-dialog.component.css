@@ -1,0 +1,37 @@
+.dialog-container {
+  min-width: 500px;
+}
+
+.stock-entry-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.form-row {
+  display: flex;
+  gap: 16px;
+}
+
+.form-row mat-form-field {
+  flex: 1;
+}
+
+mat-form-field {
+  width: 100%;
+}
+
+.total-display {
+  background: #e8f5e8;
+  padding: 12px;
+  border-radius: 4px;
+  text-align: center;
+  font-size: 16px;
+  color: #2e7d32;
+  border: 2px solid #4caf50;
+}
+
+mat-dialog-actions {
+  margin-top: 20px;
+  gap: 8px;
+}

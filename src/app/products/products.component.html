@@ -1,0 +1,72 @@
+<div class="container">
+  <div class="header">
+    <h2>Quản lý sản phẩm</h2>
+    <div class="header-actions">
+      <button mat-raised-button color="accent" (click)="importFromExcel()">
+        <mat-icon>upload</mat-icon>
+        Import từ Excel
+      </button>
+      <button mat-raised-button color="primary" (click)="openDialog()">
+        <mat-icon>add</mat-icon>
+        Thêm sản phẩm
+      </button>
+    </div>
+  </div>
+
+  <div class="content">
+    <div *ngIf="loading" class="loading">
+      <mat-spinner></mat-spinner>
+      <p>Đang tải...</p>
+    </div>
+
+    <mat-table [dataSource]="products" *ngIf="!loading" class="mat-elevation-8">
+      <ng-container matColumnDef="name">
+        <mat-header-cell *matHeaderCellDef>Tên sản phẩm</mat-header-cell>
+        <mat-cell *matCellDef="let element">{{element.name}}</mat-cell>
+      </ng-container>
+
+      <ng-container matColumnDef="code">
+        <mat-header-cell *matHeaderCellDef>Mã</mat-header-cell>
+        <mat-cell *matCellDef="let element">{{element.code}}</mat-cell>
+      </ng-container>
+
+      <ng-container matColumnDef="price">
+        <mat-header-cell *matHeaderCellDef>Giá bán (VNĐ)</mat-header-cell>
+        <mat-cell *matCellDef="let element">{{element.price | number}}</mat-cell>
+      </ng-container>
+
+      <ng-container matColumnDef="category">
+        <mat-header-cell *matHeaderCellDef>Danh mục</mat-header-cell>
+        <mat-cell *matCellDef="let element">{{element.category || 'Chưa phân loại'}}</mat-cell>
+      </ng-container>
+
+      <ng-container matColumnDef="isActive">
+        <mat-header-cell *matHeaderCellDef>Trạng thái</mat-header-cell>
+        <mat-cell *matCellDef="let element">
+          <mat-chip [class]="element.isActive ? 'active' : 'inactive'">
+            {{element.isActive ? 'Hoạt động' : 'Ngừng bán'}}
+          </mat-chip>
+        </mat-cell>
+      </ng-container>
+
+      <ng-container matColumnDef="actions">
+        <mat-header-cell *matHeaderCellDef>Thao tác</mat-header-cell>
+        <mat-cell *matCellDef="let element">
+          <button mat-icon-button (click)="openDialog(element)" matTooltip="Chỉnh sửa">
+            <mat-icon>edit</mat-icon>
+          </button>
+          <button mat-icon-button color="warn" (click)="deleteProduct(element)" matTooltip="Xóa">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </mat-cell>
+      </ng-container>
+
+      <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+      <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+    </mat-table>
+
+    <div *ngIf="products.length === 0 && !loading" class="no-data">
+      <p>Chưa có sản phẩm nào.</p>
+    </div>
+  </div>
+</div>

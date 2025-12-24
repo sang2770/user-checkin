@@ -1,0 +1,65 @@
+<div class="dialog-container">
+  <h2 mat-dialog-title>{{isEdit ? 'Chỉnh sửa' : 'Thêm'}} sản phẩm</h2>
+  
+  <mat-dialog-content>
+    <form [formGroup]="productForm" class="product-form">
+      <div class="form-row">
+        <mat-form-field appearance="outline">
+          <mat-label>Tên sản phẩm</mat-label>
+          <input matInput formControlName="name" (blur)="generateCode()" required>
+          <mat-error *ngIf="productForm.get('name')?.hasError('required')">
+            Tên sản phẩm là bắt buộc
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Mã sản phẩm</mat-label>
+          <input matInput formControlName="code" required>
+          <mat-error *ngIf="productForm.get('code')?.hasError('required')">
+            Mã sản phẩm là bắt buộc
+          </mat-error>
+        </mat-form-field>
+      </div>
+
+      <div class="form-row">
+        <mat-form-field appearance="outline">
+          <mat-label>Giá bán (VNĐ)</mat-label>
+          <input matInput type="number" formControlName="price" min="0" required>
+          <mat-error *ngIf="productForm.get('price')?.hasError('required')">
+            Giá bán là bắt buộc
+          </mat-error>
+          <mat-error *ngIf="productForm.get('price')?.hasError('min')">
+            Giá bán không thể âm
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Danh mục</mat-label>
+          <mat-select formControlName="category" required>
+            <mat-option *ngFor="let category of categories" [value]="category">
+              {{category}}
+            </mat-option>
+          </mat-select>
+          <mat-error *ngIf="productForm.get('category')?.hasError('required')">
+            Danh mục là bắt buộc
+          </mat-error>
+        </mat-form-field>
+      </div>
+
+      <div class="form-row">
+        <mat-checkbox formControlName="isActive">
+          Đang hoạt động
+        </mat-checkbox>
+      </div>
+    </form>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button (click)="onCancel()">Hủy</button>
+    <button mat-raised-button color="primary" 
+            (click)="onSave()" 
+            [disabled]="!productForm.valid">
+      {{isEdit ? 'Cập nhật' : 'Thêm'}}
+    </button>
+  </mat-dialog-actions>
+</div>

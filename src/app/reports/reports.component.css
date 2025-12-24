@@ -1,0 +1,109 @@
+.reports-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.reports-container h2 {
+  margin-bottom: 24px;
+  color: #333;
+}
+
+.report-card {
+  margin-bottom: 24px;
+  padding: 16px;
+}
+
+.date-picker {
+  margin-bottom: 20px;
+}
+
+.daily-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.stat-item {
+  background: #f5f5f5;
+  padding: 20px;
+  border-radius: 8px;
+  text-align: center;
+  border-left: 4px solid #2196f3;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.stat-label {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+.stat-value {
+  font-size: 28px;
+  font-weight: bold;
+  color: #333;
+}
+
+.stat-value.revenue {
+  color: #4caf50;
+}
+
+.top-products {
+  margin-bottom: 24px;
+}
+
+.top-products h4 {
+  margin-bottom: 16px;
+  color: #333;
+}
+
+.products-table {
+  width: 100%;
+}
+
+.alerts {
+  margin-top: 24px;
+}
+
+.alerts h4 {
+  margin-bottom: 16px;
+  color: #f44336;
+}
+
+mat-chip-listbox {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.no-data {
+  text-align: center;
+  padding: 40px;
+  color: #666;
+}
+
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40px;
+}
+
+.loading p {
+  margin-top: 16px;
+  color: #666;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .daily-stats {
+    grid-template-columns: 1fr;
+  }
+  
+  .reports-container {
+    padding: 12px;
+  }
+}

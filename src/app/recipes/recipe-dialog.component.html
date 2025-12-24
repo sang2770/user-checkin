@@ -1,0 +1,63 @@
+<div mat-dialog-title>
+  {{ isEdit ? 'Chỉnh Sửa Công Thức' : 'Thêm Công Thức Mới' }}
+</div>
+
+<div mat-dialog-content>
+  <form [formGroup]="form">
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Sản phẩm</mat-label>
+      <mat-select formControlName="productId">
+        <mat-option *ngFor="let product of data.products" [value]="product.id">
+          {{ product.name }} ({{ product.price | currency:'VND':'symbol':'1.0-0' }})
+        </mat-option>
+      </mat-select>
+      <mat-error *ngIf="form.get('productId')?.errors?.['required']">
+        Vui lòng chọn sản phẩm
+      </mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Nguyên liệu</mat-label>
+      <mat-select formControlName="ingredientId">
+        <mat-option *ngFor="let ingredient of data.ingredients" [value]="ingredient.id">
+          {{ ingredient.name }} ({{ ingredient.unit }})
+        </mat-option>
+      </mat-select>
+      <mat-error *ngIf="form.get('ingredientId')?.errors?.['required']">
+        Vui lòng chọn nguyên liệu
+      </mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Số lượng cần dùng</mat-label>
+      <input matInput type="number" step="0.01" formControlName="quantity">
+      <span matSuffix *ngIf="getSelectedIngredient()">{{ getSelectedIngredient()?.unit }}</span>
+      <mat-error *ngIf="form.get('quantity')?.errors?.['required']">
+        Vui lòng nhập số lượng
+      </mat-error>
+      <mat-error *ngIf="form.get('quantity')?.errors?.['min']">
+        Số lượng phải lớn hơn 0
+      </mat-error>
+    </mat-form-field>
+
+    <div class="recipe-preview" *ngIf="form.valid">
+      <mat-card>
+        <mat-card-content>
+          <h4>Xem trước công thức:</h4>
+          <p>
+            <strong>1 {{ getSelectedProduct()?.name }}</strong> = 
+            <strong>{{ form.get('quantity')?.value }} {{ getSelectedIngredient()?.unit }}</strong> 
+            {{ getSelectedIngredient()?.name }}
+          </p>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </form>
+</div>
+
+<div mat-dialog-actions>
+  <button mat-button (click)="onCancel()">Hủy</button>
+  <button mat-raised-button color="primary" (click)="onSubmit()" [disabled]="!form.valid">
+    {{ isEdit ? 'Cập nhật' : 'Thêm' }}
+  </button>
+</div>

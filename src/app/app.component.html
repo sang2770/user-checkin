@@ -6,11 +6,12 @@
   <!-- Sidebar -->
   <mat-sidenav #sidenav mode="side" opened>
     <mat-nav-list>
-      <a mat-list-item routerLink="/">🏠 Nhân viên</a>
-      <a mat-list-item routerLink="/checkin">ℹ️ Chấm công</a>
-      <a mat-list-item routerLink="/department">🏢 Phòng ban</a>
-      <a mat-list-item routerLink="/position">👔 Chức vụ</a>
-      <a mat-list-item routerLink="/devices">💻 Thiết bị</a>
+      <a mat-list-item routerLink="/ingredients">🥩 Nguyên liệu</a>
+      <a mat-list-item routerLink="/products">🍜 Sản phẩm</a>
+      <a mat-list-item routerLink="/recipes">🍽️ Công thức</a>
+      <a mat-list-item routerLink="/stock-entries">📦 Nhập kho</a>
+      <a mat-list-item routerLink="/import-sales">📂 Import Doanh Thu</a>
+      <a mat-list-item routerLink="/reports">📊 Báo cáo</a>
     </mat-nav-list>
   </mat-sidenav>
 
@@ -20,18 +21,10 @@
       <button mat-icon-button (click)="sidenav.toggle()">
         <mat-icon>menu</mat-icon>
       </button>
-      <span style="font-size: 18px; font-weight: bold;">Hệ thống quản lý nhân viên</span>
+      <span style="font-size: 18px; font-weight: bold;">Hệ thống quản lý quán net</span>
     </mat-toolbar>
     <div class="content">
       <router-outlet></router-outlet>
     </div>
   </mat-sidenav-content>
 </mat-sidenav-container>
-<!-- <div class="demo" *ngIf="isShowDemo" style="z-index: 100000;">
-  <div class="demo-content" >
-    <div class="demo-header">
-      <h3>Hết hạn sử dụng ! Vui lòng liên hệ để được hỗ trợ</h3>
-    </div>
-  </div>
-</div> -->
-
