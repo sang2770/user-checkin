@@ -12,7 +12,7 @@ export interface IIngredient extends IModel {
 export interface IProduct extends IModel {
   price: number; // giá bán
   category?: string; // loại: đồ ăn, đồ uống, thuốc lá, etc.
-  isActive?: boolean;
+  isActive?: boolean | number;
 }
 
 // Công thức món ăn (định lượng nguyên liệu cho từng món)

@@ -23,12 +23,14 @@ export class ProductDialogComponent implements OnInit {
     @Inject(MAT_DIALOG_DATA) public data: IProduct
   ) {
     this.isEdit = !!data;
-    
+    if (this.isEdit) {
+      data.isActive = (data.isActive === 1 || data.isActive) ? true : false;
+    }
     this.productForm = this.fb.group({
       name: [data?.name || '', [Validators.required]],
       code: [data?.code || '', [Validators.required]],
       price: [data?.price || 0, [Validators.required, Validators.min(0)]],
-      category: [data?.category || '', [Validators.required]],
+      category: [data?.category || '', []],
       isActive: [data?.isActive !== false] // Default to true
     });
   }

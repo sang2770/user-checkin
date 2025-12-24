@@ -39,7 +39,10 @@ export class ProductsComponent implements OnInit {
   openDialog(product?: IProduct) {
     const dialogRef = this.dialog.open(ProductDialogComponent, {
       width: '500px',
-      data: product ? { ...product } : null
+      data: product ? { ...product } : null,
+      autoFocus: false,
+      restoreFocus: true,
+      disableClose: false,
     });
 
     dialogRef.afterClosed().subscribe(result => {
@@ -84,5 +87,4 @@ export class ProductsComponent implements OnInit {
       }
     }
   }
-
 }

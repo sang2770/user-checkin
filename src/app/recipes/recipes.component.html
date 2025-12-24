@@ -77,12 +77,38 @@
         <div class="recipe-groups">
           <div *ngFor="let group of getRecipesByProduct()" class="recipe-group">
             <div class="product-header">
-              <h3>{{ group.productName }}</h3>
+              <div class="product-info">
+                <h3>{{ group.productName }}</h3>
+                <span class="product-price">{{ group.productPrice | currency:'VND':'symbol':'1.0-0' }}</span>
+              </div>
+              <div class="product-actions">
+                <button mat-icon-button 
+                        (click)="openCreateDialog(group.productId)" 
+                        matTooltip="Thêm nguyên liệu cho món này"
+                        color="primary">
+                  <mat-icon>add_circle</mat-icon>
+                </button>
+              </div>
             </div>
-            <div class="ingredients-list">
-              <div *ngFor="let ingredient of group.ingredients" class="ingredient-item">
-                <span class="ingredient-name">{{ ingredient.ingredientName }}</span>
-                <span class="ingredient-quantity">{{ ingredient.quantity }} {{ ingredient.unit }}</span>
+            
+            <div class="recipe-formula">
+              <div class="formula-text">
+                <strong>1 {{ group.productName }}</strong> = 
+                <span class="ingredients-list">
+                  <span *ngFor="let ingredient of group.ingredients; let last = last" class="ingredient-item">
+                    <strong>{{ ingredient.quantity }} {{ ingredient.unit }}</strong> {{ ingredient.ingredientName }}
+                    <span *ngIf="!last" class="separator"> + </span>
+                  </span>
+                </span>
+              </div>
+            </div>
+            
+            <div class="ingredients-detail">
+              <div *ngFor="let ingredient of group.ingredients" class="ingredient-detail-item">
+                <div class="ingredient-info">
+                  <span class="ingredient-name">{{ ingredient.ingredientName }}</span>
+                  <span class="ingredient-quantity">{{ ingredient.quantity }} {{ ingredient.unit }}</span>
+                </div>
                 <div class="ingredient-actions">
                   <button mat-icon-button (click)="openEditDialog(ingredient.recipe)" matTooltip="Chỉnh sửa">
                     <mat-icon>edit</mat-icon>

@@ -69,13 +69,19 @@ export class RecipesComponent implements OnInit {
     return ingredient?.unit || '';
   }
 
-  openCreateDialog() {
+  openCreateDialog(productId?: number) {
     const dialogRef = this.dialog.open(RecipeDialogComponent, {
-      width: '600px',
+      width: '700px',
+      maxWidth: '90vw',
+      maxHeight: '90vh',
+      disableClose: false,
+      autoFocus: false, // Prevent auto focus to avoid aria-hidden issues
+      restoreFocus: true,
       data: {
         recipe: null,
         products: this.products,
-        ingredients: this.ingredients
+        ingredients: this.ingredients,
+        productId: productId
       }
     });
 
@@ -88,7 +94,12 @@ export class RecipesComponent implements OnInit {
 
   openEditDialog(recipe: IRecipe) {
     const dialogRef = this.dialog.open(RecipeDialogComponent, {
-      width: '600px',
+      width: '700px',
+      maxWidth: '90vw',
+      maxHeight: '90vh',
+      disableClose: false,
+      autoFocus: false, // Prevent auto focus to avoid aria-hidden issues
+      restoreFocus: true,
       data: {
         recipe: recipe,
         products: this.products,
@@ -206,9 +217,11 @@ export class RecipesComponent implements OnInit {
     
     this.recipes.forEach(recipe => {
       if (!groupedRecipes[recipe.productId]) {
+        const product = this.products.find(p => p.id === recipe.productId);
         groupedRecipes[recipe.productId] = {
           productId: recipe.productId,
           productName: this.getProductName(recipe.productId),
+          productPrice: product?.price || 0,
           ingredients: []
         };
       }

@@ -41,10 +41,21 @@
       
       <div class="file-format-info">
         <mat-icon>info</mat-icon>
-        <p>
-          <strong>Định dạng file:</strong> File Excel phải có các cột: 
-          <em>Tên sản phẩm, Số lượng, Thành tiền, Nhân viên, Ngày</em>
-        </p>
+        <div class="format-details">
+          <p><strong>Định dạng file Excel:</strong></p>
+          <ul>
+            <li><strong>Tên sản phẩm/Dịch vụ:</strong> Cột chứa tên món ăn/đồ uống</li>
+            <li><strong>Số lượng:</strong> Cột chứa số lượng bán ra</li>
+            <li><strong>Thành tiền:</strong> Cột chứa tổng tiền của món đó</li>
+            <li><strong>Nhân viên:</strong> Cột chứa tên nhân viên bán (tùy chọn)</li>
+            <li><strong>Ngày:</strong> Cột chứa ngày bán (tùy chọn)</li>
+          </ul>
+          <p class="note">
+            <mat-icon>lightbulb</mat-icon>
+            <strong>Lưu ý:</strong> Hệ thống sẽ tự động tạo sản phẩm mới nếu chưa có trong danh mục.
+            Tên cột có thể linh hoạt (VD: "Tên sản phẩm", "Dịch vụ", "Tên món", v.v.)
+          </p>
+        </div>
       </div>
     </mat-card-content>
   </mat-card>

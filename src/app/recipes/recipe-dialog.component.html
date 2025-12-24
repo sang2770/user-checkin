@@ -6,7 +6,7 @@
   <form [formGroup]="form">
     <mat-form-field appearance="outline" class="full-width">
       <mat-label>Sản phẩm</mat-label>
-      <mat-select formControlName="productId">
+      <mat-select formControlName="productId" #firstInput>
         <mat-option *ngFor="let product of data.products" [value]="product.id">
           {{ product.name }} ({{ product.price | currency:'VND':'symbol':'1.0-0' }})
         </mat-option>
@@ -16,39 +16,95 @@
       </mat-error>
     </mat-form-field>
 
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Nguyên liệu</mat-label>
-      <mat-select formControlName="ingredientId">
-        <mat-option *ngFor="let ingredient of data.ingredients" [value]="ingredient.id">
-          {{ ingredient.name }} ({{ ingredient.unit }})
-        </mat-option>
-      </mat-select>
-      <mat-error *ngIf="form.get('ingredientId')?.errors?.['required']">
-        Vui lòng chọn nguyên liệu
-      </mat-error>
-    </mat-form-field>
+    <!-- Existing recipes info -->
+    <div class="existing-recipes" *ngIf="existingRecipes.length > 0 && selectedProduct">
+      <mat-card class="info-card">
+        <mat-card-header>
+          <mat-card-title>Công thức hiện tại của "{{ selectedProduct.name }}":</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="recipe-list">
+            <div *ngFor="let recipe of existingRecipes" class="recipe-item">
+              <span>{{ getIngredientName(recipe.ingredientId) }}: </span>
+              <strong>{{ recipe.quantity }} {{ getIngredientUnit(recipe.ingredientId) }}</strong>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
 
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Số lượng cần dùng</mat-label>
-      <input matInput type="number" step="0.01" formControlName="quantity">
-      <span matSuffix *ngIf="getSelectedIngredient()">{{ getSelectedIngredient()?.unit }}</span>
-      <mat-error *ngIf="form.get('quantity')?.errors?.['required']">
-        Vui lòng nhập số lượng
-      </mat-error>
-      <mat-error *ngIf="form.get('quantity')?.errors?.['min']">
-        Số lượng phải lớn hơn 0
-      </mat-error>
-    </mat-form-field>
+    <!-- Ingredients Form Array -->
+    <div class="ingredients-section">
+      <h4>{{ isEdit ? 'Chỉnh sửa nguyên liệu:' : 'Thêm nguyên liệu:' }}</h4>
+      
+      <div formArrayName="ingredients">
+        <div *ngFor="let ingredientGroup of ingredientsArray.controls; let i = index" 
+             [formGroupName]="i" 
+             class="ingredient-row">
+          <mat-card class="ingredient-card">
+            <mat-card-content>
+              <div class="ingredient-form-row">
+                <mat-form-field appearance="outline" class="ingredient-select">
+                  <mat-label>Nguyên liệu</mat-label>
+                  <mat-select formControlName="ingredientId">
+                    <mat-option *ngFor="let ingredient of getAvailableIngredients(i)" [value]="ingredient.id">
+                      {{ ingredient.name }} ({{ ingredient.unit }})
+                    </mat-option>
+                  </mat-select>
+                  <mat-error *ngIf="ingredientGroup.get('ingredientId')?.errors?.['required']">
+                    Vui lòng chọn nguyên liệu
+                  </mat-error>
+                </mat-form-field>
 
-    <div class="recipe-preview" *ngIf="form.valid">
-      <mat-card>
+                <mat-form-field appearance="outline" class="quantity-input">
+                  <mat-label>Số lượng</mat-label>
+                  <input matInput type="number" step="0.01" formControlName="quantity">
+                  <span matSuffix *ngIf="getSelectedIngredient(i)">{{ getSelectedIngredient(i)?.unit }}</span>
+                  <mat-error *ngIf="ingredientGroup.get('quantity')?.errors?.['required']">
+                    Vui lòng nhập số lượng
+                  </mat-error>
+                  <mat-error *ngIf="ingredientGroup.get('quantity')?.errors?.['min']">
+                    Số lượng phải lớn hơn 0
+                  </mat-error>
+                </mat-form-field>
+
+                <button *ngIf="ingredientsArray.length > 1 && !isEdit" 
+                        mat-icon-button 
+                        color="warn" 
+                        type="button"
+                        (click)="removeIngredientFormGroup(i)"
+                        matTooltip="Xóa nguyên liệu">
+                  <mat-icon>remove_circle</mat-icon>
+                </button>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </div>
+
+      <button *ngIf="!isEdit" 
+              mat-stroked-button 
+              type="button" 
+              (click)="addIngredientFormGroup()"
+              class="add-ingredient-btn">
+        <mat-icon>add</mat-icon>
+        Thêm nguyên liệu khác
+      </button>
+    </div>
+
+    <!-- Recipe Preview -->
+    <div class="recipe-preview" *ngIf="form.valid && selectedProduct">
+      <mat-card class="preview-card">
         <mat-card-content>
           <h4>Xem trước công thức:</h4>
-          <p>
-            <strong>1 {{ getSelectedProduct()?.name }}</strong> = 
-            <strong>{{ form.get('quantity')?.value }} {{ getSelectedIngredient()?.unit }}</strong> 
-            {{ getSelectedIngredient()?.name }}
-          </p>
+          <div class="preview-formula">
+            <strong>1 {{ selectedProduct.name }}</strong> = 
+            <span *ngFor="let ingredient of ingredientsArray.controls; let last = last">
+              <strong>{{ ingredient.get('quantity')?.value }} {{ getSelectedIngredient(ingredientsArray.controls.indexOf(ingredient))?.unit }}</strong>
+              {{ getSelectedIngredient(ingredientsArray.controls.indexOf(ingredient))?.name }}
+              <span *ngIf="!last"> + </span>
+            </span>
+          </div>
         </mat-card-content>
       </mat-card>
     </div>
