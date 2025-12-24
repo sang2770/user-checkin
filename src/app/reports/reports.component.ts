@@ -8,7 +8,8 @@ import { DatabaseService } from '../services/database.service';
 })
 export class ReportsComponent implements OnInit {
   selectedDate: string = new Date().toISOString().split('T')[0];
-  selectedMonth: Date = new Date();
+  selectedMonth: number = new Date().getMonth() + 1;
+  selectedYear: number = new Date().getFullYear();
   dailyReport: any = {};
   inventoryReport: any[] = [];
   dailyOrders: any[] = [];
@@ -79,9 +80,7 @@ export class ReportsComponent implements OnInit {
   async loadMonthlyProfitLoss() {
     this.loadingMonthly = true;
     try {
-      const year = this.selectedMonth.getFullYear();
-      const month = this.selectedMonth.getMonth() + 1;
-      this.monthlyProfitLossReport = await this.databaseService.getMonthlyProfitLossReport(year, month);
+      this.monthlyProfitLossReport = await this.databaseService.getMonthlyProfitLossReport(this.selectedYear, this.selectedMonth);
     } catch (error) {
       console.error('Error loading monthly profit/loss report:', error);
     } finally {
@@ -97,6 +96,14 @@ export class ReportsComponent implements OnInit {
   }
 
   onMonthChange() {
+    this.loadMonthlyProfitLoss();
+  }
+
+  onMonthInputChange() {
+    this.loadMonthlyProfitLoss();
+  }
+
+  onYearInputChange() {
     this.loadMonthlyProfitLoss();
   }
 

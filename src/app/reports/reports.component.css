@@ -140,6 +140,20 @@ mat-chip-listbox {
   margin-bottom: 20px;
 }
 
+.month-year-inputs {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.month-input {
+  flex: 0 0 120px;
+}
+
+.year-input {
+  flex: 0 0 120px;
+}
+
 /* Orders table */
 .orders-table {
   width: 100%;

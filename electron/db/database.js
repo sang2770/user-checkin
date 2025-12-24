@@ -969,7 +969,8 @@ module.exports = {
     return new Promise((resolve, reject) => {
       const startDate = `${year}-${month.toString().padStart(2, "0")}-01`;
       const endDate = `${year}-${month.toString().padStart(2, "0")}-31`;
-
+      console.log(startDate, endDate);
+      
       // Get total revenue for the month
       db.get(
         `

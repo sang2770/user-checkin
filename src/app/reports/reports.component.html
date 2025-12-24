@@ -28,7 +28,8 @@
         </div>
         <div class="stat-item">
           <div class="stat-label">Lãi/Lỗ ròng</div>
-          <div class="stat-value" [class.profit]="(profitLossReport.netProfit || 0) >= 0" [class.loss]="(profitLossReport.netProfit || 0) < 0">
+          <div class="stat-value" [class.profit]="(profitLossReport.netProfit || 0) >= 0"
+            [class.loss]="(profitLossReport.netProfit || 0) < 0">
             {{formatCurrency(profitLossReport.netProfit)}}
           </div>
         </div>
@@ -79,11 +80,11 @@
           <mat-row *matRowDef="let row; columns: orderColumns;"></mat-row>
         </mat-table>
       </div>
-      
+
       <div *ngIf="dailyOrders.length === 0 && !loadingOrders" class="no-data">
         <p>Không có đơn hàng nào trong ngày này</p>
       </div>
-      
+
       <div *ngIf="loadingOrders" class="loading-inline">
         <mat-spinner diameter="30"></mat-spinner>
         <span>Đang tải đơn hàng...</span>
@@ -123,7 +124,7 @@
       </div>
     </mat-card-content>
   </mat-card>
-  
+
   <!-- Monthly Profit/Loss Report -->
   <mat-card class="report-card">
     <mat-card-header>
@@ -131,12 +132,19 @@
     </mat-card-header>
     <mat-card-content>
       <div class="month-picker">
-        <mat-form-field appearance="outline">
-          <mat-label>Chọn tháng/năm</mat-label>
-          <input matInput  [matDatepicker]="monthPicker" [(ngModel)]="selectedMonth" (dateChange)="onMonthChange()">
-          <mat-datepicker-toggle matSuffix [for]="monthPicker"></mat-datepicker-toggle>
-          <mat-datepicker #monthPicker startView="year" (monthSelected)="selectedMonth = $event; onMonthChange()" [disabled]="false"></mat-datepicker>
-        </mat-form-field>
+        <div class="month-year-inputs">
+          <mat-form-field appearance="outline" class="month-input">
+            <mat-label>Tháng</mat-label>
+            <input matInput type="number" min="1" max="12" [(ngModel)]="selectedMonth">
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="year-input">
+            <mat-label>Năm</mat-label>
+            <input matInput type="number" min="2020" max="2030" [(ngModel)]="selectedYear">
+          </mat-form-field>
+          <button mat-raised-button color="primary" (click)="loadMonthlyProfitLoss()">
+            Tải báo cáo
+          </button>
+        </div>
       </div>
 
       <div *ngIf="!loadingMonthly" class="monthly-stats">
@@ -150,7 +158,8 @@
         </div>
         <div class="stat-item">
           <div class="stat-label">Lãi/Lỗ ròng tháng</div>
-          <div class="stat-value" [class.profit]="(monthlyProfitLossReport.netProfit || 0) >= 0" [class.loss]="(monthlyProfitLossReport.netProfit || 0) < 0">
+          <div class="stat-value" [class.profit]="(monthlyProfitLossReport.netProfit || 0) >= 0"
+            [class.loss]="(monthlyProfitLossReport.netProfit || 0) < 0">
             {{formatCurrency(monthlyProfitLossReport.netProfit)}}
           </div>
         </div>
