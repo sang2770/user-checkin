@@ -76,6 +76,9 @@ ipcMain.handle('clearSalesHistory', async () => await db.clearSalesHistory());
 // Reports
 ipcMain.handle('getDailyReport', async (_, date) => await db.getDailyReport(date));
 ipcMain.handle('getInventoryReport', async () => await db.getInventoryReport());
+ipcMain.handle('getOrdersByDate', async (_, date) => await db.getOrdersByDate(date));
+ipcMain.handle('getProfitLossReport', async (_, date) => await db.getProfitLossReport(date));
+ipcMain.handle('getMonthlyProfitLossReport', async (_, year, month) => await db.getMonthlyProfitLossReport(year, month));
 
 
 autoUpdater.on("update-available", () => {

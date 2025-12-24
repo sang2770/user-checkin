@@ -55,7 +55,6 @@ export class CustomDateAdapter extends NativeDateAdapter {
     return days + '/' + months + '/' + year;
   }
 }
-
 @NgModule({
   declarations: [
     AppComponent, 
@@ -106,7 +105,7 @@ export class CustomDateAdapter extends NativeDateAdapter {
     provide: DateAdapter,
     useClass: CustomDateAdapter,
     deps: [MAT_DATE_LOCALE, Platform]
-  },
+  }
   ],
   bootstrap: [AppComponent],
 })

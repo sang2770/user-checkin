@@ -97,6 +97,22 @@ export class DatabaseService {
     return await (window as any).electronAPI.getInventoryReport();
   }
 
+  async getOrdersByDate(date: string): Promise<any[]> {
+    return await (window as any).electronAPI.getOrdersByDate(date);
+  }
+
+  async getAllOrders(): Promise<any[]> {
+    return await (window as any).electronAPI.getSaleOrders();
+  }
+
+  async getProfitLossReport(date: string): Promise<any> {
+    return await (window as any).electronAPI.getProfitLossReport(date);
+  }
+
+  async getMonthlyProfitLossReport(year: number, month: number): Promise<any> {
+    return await (window as any).electronAPI.getMonthlyProfitLossReport(year, month);
+  }
+
   // Import Sales from Excel
   async importSalesFromExcel(fileBuffer: ArrayBuffer): Promise<boolean> {
     return await (window as any).electronAPI.importSalesFromExcel(fileBuffer);

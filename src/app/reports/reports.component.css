@@ -107,3 +107,65 @@ mat-chip-listbox {
     padding: 12px;
   }
 }
+
+/* Profit/Loss specific styles */
+.profit-loss-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.stat-value.profit {
+  color: #4caf50;
+}
+
+.stat-value.loss {
+  color: #f44336;
+}
+
+.stat-value.cost {
+  color: #ff9800;
+}
+
+/* Monthly stats */
+.monthly-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.month-picker {
+  margin-bottom: 20px;
+}
+
+/* Orders table */
+.orders-table {
+  width: 100%;
+  margin-top: 16px;
+}
+
+/* Loading inline */
+.loading-inline {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 20px;
+  color: #666;
+  justify-content: center;
+}
+
+/* Section divider */
+.section-divider {
+  margin: 32px 0 20px 0;
+  padding: 16px 0;
+  border-top: 2px solid #e0e0e0;
+}
+
+.section-divider h4 {
+  margin: 0;
+  color: #333;
+  font-size: 18px;
+  font-weight: 500;
+}

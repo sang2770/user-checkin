@@ -64,7 +64,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   getSaleOrders: () => ipcRenderer.invoke('getSaleOrders'),
   createSaleOrder: (saleOrder, items) => ipcRenderer.invoke('createSaleOrder', saleOrder, items),
   getSaleOrderItems: (saleOrderId) => ipcRenderer.invoke('getSaleOrderItems', saleOrderId),
-
+  
   // Import Sales from Excel
   importSalesFromExcel: (fileBuffer) => ipcRenderer.invoke('importSalesFromExcel', fileBuffer),
   clearSalesHistory: () => ipcRenderer.invoke('clearSalesHistory'),
@@ -72,6 +72,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
   // Reports
   getDailyReport: (date) => ipcRenderer.invoke('getDailyReport', date),
   getInventoryReport: () => ipcRenderer.invoke('getInventoryReport'),
-
+  getOrdersByDate: (date) => ipcRenderer.invoke('getOrdersByDate', date),
+  getProfitLossReport: (date) => ipcRenderer.invoke('getProfitLossReport', date),
+  getMonthlyProfitLossReport: (year, month) => ipcRenderer.invoke('getMonthlyProfitLossReport', year, month),
+  
 });
 
