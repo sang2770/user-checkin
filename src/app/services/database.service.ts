@@ -153,4 +153,21 @@ export class DatabaseService {
   async clearSalesHistory(): Promise<boolean> {
     return await (window as any).electronAPI.clearSalesHistory();
   }
+
+  // Backup & Restore
+  async backupDatabase(): Promise<string> {
+    return await (window as any).electronAPI.backupDatabase();
+  }
+
+  async restoreDatabase(): Promise<string> {
+    return await (window as any).electronAPI.restoreDatabase();
+  }
+
+  async exportDatabaseToJson(): Promise<string> {
+    return await (window as any).electronAPI.exportDatabaseToJson();
+  }
+
+  async importDatabaseFromJson(): Promise<string> {
+    return await (window as any).electronAPI.importDatabaseFromJson();
+  }
 }

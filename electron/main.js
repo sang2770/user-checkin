@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog } = require('electron');
 const { autoUpdater } = require('electron-updater');
 const path = require('path');
 const db = require("./db/database");
@@ -16,18 +16,18 @@ app.whenReady().then(() => {
     }
   });
 
-  // mainWindow.loadURL(
-  //   url.format({
-  //     pathname: path.join(__dirname, `dist/user-checkin/browser/index.html`),
-  //     protocol: "file:",
-  //     slashes: true
-  //   })
-  // );
+  mainWindow.loadURL(
+    url.format({
+      pathname: path.join(__dirname, `dist/user-checkin/browser/index.html`),
+      protocol: "file:",
+      slashes: true
+    })
+  );
 
-  mainWindow.loadURL("http://localhost:4200");
-  mainWindow.webContents.openDevTools();
+  // mainWindow.loadURL("http://localhost:4200");
+  // mainWindow.webContents.openDevTools();
   autoUpdater.checkForUpdatesAndNotify();
-  // mainWindow.setMenuBarVisibility(false);
+  mainWindow.setMenuBarVisibility(false);
 });
 
 // Lắng nghe sự kiện từ Angular để lấy dữ liệu
@@ -80,6 +80,90 @@ ipcMain.handle('getInventoryReport', async () => await db.getInventoryReport());
 ipcMain.handle('getOrdersByDate', async (_, date) => await db.getOrdersByDate(date));
 ipcMain.handle('getProfitLossReport', async (_, date) => await db.getProfitLossReport(date));
 ipcMain.handle('getMonthlyProfitLossReport', async (_, year, month) => await db.getMonthlyProfitLossReport(year, month));
+
+// Backup & Restore
+ipcMain.handle('backupDatabase', async () => {
+  const date = new Date().toISOString().split('T')[0];
+  const time = new Date().toTimeString().split(' ')[0].replace(/:/g, '-');
+  const defaultPath = `backup_${date}_${time}.db`;
+
+  const result = await dialog.showSaveDialog(mainWindow, {
+    title: 'Chọn vị trí lưu backup',
+    defaultPath: defaultPath,
+    filters: [
+      { name: 'Database Files', extensions: ['db'] },
+      { name: 'All Files', extensions: ['*'] }
+    ]
+  });
+
+  if (result.canceled) {
+    throw new Error('Người dùng đã hủy backup');
+  }
+
+  return await db.backupDatabase(result.filePath);
+});
+
+ipcMain.handle('restoreDatabase', async () => {
+  const result = await dialog.showOpenDialog(mainWindow, {
+    title: 'Chọn file backup để khôi phục',
+    filters: [
+      { name: 'Database Files', extensions: ['db'] },
+      { name: 'All Files', extensions: ['*'] }
+    ],
+    properties: ['openFile']
+  });
+
+  if (result.canceled) {
+    throw new Error('Người dùng đã hủy restore');
+  }
+
+  return await db.restoreDatabase(result.filePaths[0]);
+});
+
+ipcMain.handle('exportDatabaseToJson', async () => {
+  const date = new Date().toISOString().split('T')[0];
+  const time = new Date().toTimeString().split(' ')[0].replace(/:/g, '-');
+  const defaultPath = `backup_${date}_${time}.json`;
+
+  const result = await dialog.showSaveDialog(mainWindow, {
+    title: 'Xuất database ra JSON',
+    defaultPath: defaultPath,
+    filters: [
+      { name: 'JSON Files', extensions: ['json'] },
+      { name: 'All Files', extensions: ['*'] }
+    ]
+  });
+
+  if (result.canceled) {
+    throw new Error('Người dùng đã hủy export');
+  }
+
+  const jsonData = await db.exportDatabaseToJson();
+  const fs = require('fs');
+  fs.writeFileSync(result.filePath, jsonData);
+
+  return result.filePath;
+});
+
+ipcMain.handle('importDatabaseFromJson', async () => {
+  const result = await dialog.showOpenDialog(mainWindow, {
+    title: 'Chọn file JSON để import',
+    filters: [
+      { name: 'JSON Files', extensions: ['json'] },
+      { name: 'All Files', extensions: ['*'] }
+    ],
+    properties: ['openFile']
+  });
+
+  if (result.canceled) {
+    throw new Error('Người dùng đã hủy import');
+  }
+
+  const fs = require('fs');
+  const jsonData = fs.readFileSync(result.filePaths[0], 'utf8');
+
+  return await db.importDatabaseFromJson(jsonData);
+});
 
 
 autoUpdater.on("update-available", () => {

@@ -311,6 +311,83 @@
     </mat-card-content>
   </mat-card>
 
+  <!-- Backup & Restore -->
+  <mat-card class="report-card">
+    <mat-card-header>
+      <mat-card-title>Sao lưu & Khôi phục dữ liệu</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="backup-restore-section">
+        <div class="backup-section">
+          <h4>Sao lưu dữ liệu</h4>
+          <p>Tạo bản sao lưu toàn bộ dữ liệu của hệ thống</p>
+          <div class="backup-actions">
+            <button
+              mat-raised-button
+              color="primary"
+              (click)="backupDatabase()"
+              [disabled]="loadingBackup"
+            >
+              <mat-icon>backup</mat-icon>
+              <span *ngIf="!loadingBackup">Sao lưu Database</span>
+              <span *ngIf="loadingBackup">Đang sao lưu...</span>
+            </button>
+            <button
+              mat-raised-button
+              color="accent"
+              (click)="exportToJson()"
+              [disabled]="loadingExport"
+            >
+              <mat-icon>file_download</mat-icon>
+              <span *ngIf="!loadingExport">Xuất JSON</span>
+              <span *ngIf="loadingExport">Đang xuất...</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="restore-section">
+          <h4>Khôi phục dữ liệu</h4>
+          <p>Khôi phục dữ liệu từ file backup hoặc JSON</p>
+          <div class="restore-actions">
+            <button
+              mat-raised-button
+              color="warn"
+              (click)="restoreDatabase()"
+              [disabled]="loadingRestore"
+            >
+              <mat-icon>restore</mat-icon>
+              <span *ngIf="!loadingRestore">Khôi phục Database</span>
+              <span *ngIf="loadingRestore">Đang khôi phục...</span>
+            </button>
+            <button
+              mat-raised-button
+              color="warn"
+              (click)="importFromJson()"
+              [disabled]="loadingImport"
+            >
+              <mat-icon>file_upload</mat-icon>
+              <span *ngIf="!loadingImport">Import JSON</span>
+              <span *ngIf="loadingImport">Đang import...</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="backup-info">
+          <mat-icon>info</mat-icon>
+          <div>
+            <strong>Lưu ý:</strong>
+            <ul>
+              <li>Sao lưu Database: Tạo file .db hoàn chỉnh</li>
+              <li>Xuất JSON: Tạo file .json dễ đọc, có thể chỉnh sửa</li>
+              <li>Khôi phục sẽ ghi đè toàn bộ dữ liệu hiện tại</li>
+              <li>Nên sao lưu trước khi khôi phục</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
   <div *ngIf="loading" class="loading">
     <mat-spinner></mat-spinner>
     <p>Đang tải báo cáo...</p>

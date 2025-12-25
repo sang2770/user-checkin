@@ -2,8 +2,9 @@ const { Database } = require("sqlite3").verbose();
 const { app } = require("electron");
 const path = require("path");
 const XLSX = require("xlsx");
-// const dbPath = path.join(app.getPath("userData"), "employees.db");
-const dbPath = path.join(path.dirname(__dirname), "employees.db");
+const fs = require("fs");
+const dbPath = path.join(app.getPath("userData"), "employees.db");
+// const dbPath = path.join(path.dirname(__dirname), "employees.db");
 
 console.log("DB Path:", dbPath);
 
@@ -1178,6 +1179,235 @@ module.exports = {
           });
         }
       );
+    });
+  },
+
+  // Backup and Restore functions
+  backupDatabase: (backupPath) => {
+    return new Promise((resolve, reject) => {
+      try {
+        // Close current database connection temporarily
+        db.close((closeErr) => {
+          if (closeErr) {
+            console.error("Error closing database for backup:", closeErr);
+            return reject(closeErr);
+          }
+
+          // Copy the database file
+          fs.copyFile(dbPath, backupPath, (copyErr) => {
+            if (copyErr) {
+              console.error("Error copying database:", copyErr);
+              reject(copyErr);
+            } else {
+              console.log("Database backed up to:", backupPath);
+
+              // Reopen the database
+              const newDb = new Database(dbPath, (reopenErr) => {
+                if (reopenErr) {
+                  console.error("Error reopening database:", reopenErr);
+                  reject(reopenErr);
+                } else {
+                  // Replace the global db variable
+                  Object.setPrototypeOf(db, newDb);
+                  Object.assign(db, newDb);
+                  resolve(backupPath);
+                }
+              });
+            }
+          });
+        });
+      } catch (error) {
+        reject(error);
+      }
+    });
+  },
+
+  restoreDatabase: (restorePath) => {
+    return new Promise((resolve, reject) => {
+      try {
+        // Check if restore file exists
+        if (!fs.existsSync(restorePath)) {
+          return reject(new Error("Backup file không tồn tại: " + restorePath));
+        }
+
+        // Close current database connection
+        db.close((closeErr) => {
+          if (closeErr) {
+            console.error("Error closing database for restore:", closeErr);
+            return reject(closeErr);
+          }
+
+          // Copy backup file over current database
+          fs.copyFile(restorePath, dbPath, (copyErr) => {
+            if (copyErr) {
+              console.error("Error restoring database:", copyErr);
+              reject(copyErr);
+            } else {
+              console.log("Database restored from:", restorePath);
+
+              // Reopen the database
+              const newDb = new Database(dbPath, (reopenErr) => {
+                if (reopenErr) {
+                  console.error("Error reopening database:", reopenErr);
+                  reject(reopenErr);
+                } else {
+                  // Replace the global db variable
+                  Object.setPrototypeOf(db, newDb);
+                  Object.assign(db, newDb);
+                  resolve("Khôi phục database thành công");
+                }
+              });
+            }
+          });
+        });
+      } catch (error) {
+        reject(error);
+      }
+    });
+  },
+
+  exportDatabaseToJson: () => {
+    return new Promise((resolve, reject) => {
+      const exportData = {};
+      const tables = [
+        'ingredients', 'products', 'recipes', 'stock_entries',
+        'sale_orders', 'sale_order_items', 'employees', 'departments',
+        'positions', 'attendance'
+      ];
+
+      let completedTables = 0;
+
+      tables.forEach(tableName => {
+        db.all(`SELECT * FROM ${tableName}`, [], (err, rows) => {
+          if (err && !err.message.includes('no such table')) {
+            console.error(`Error exporting table ${tableName}:`, err);
+            return reject(err);
+          }
+
+          exportData[tableName] = rows || [];
+          completedTables++;
+
+          if (completedTables === tables.length) {
+            exportData.exportDate = new Date().toISOString();
+            exportData.version = "1.0";
+            resolve(JSON.stringify(exportData, null, 2));
+          }
+        });
+      });
+    });
+  },
+
+  importDatabaseFromJson: (jsonData) => {
+    return new Promise((resolve, reject) => {
+      try {
+        const data = JSON.parse(jsonData);
+
+        db.serialize(() => {
+          db.run("BEGIN TRANSACTION");
+
+          // Clear existing data (optional - could be configurable)
+          const clearQueries = [
+            "DELETE FROM sale_order_items",
+            "DELETE FROM sale_orders",
+            "DELETE FROM stock_entries",
+            "DELETE FROM recipes",
+            "DELETE FROM products",
+            "DELETE FROM ingredients",
+            "DELETE FROM attendance",
+            "DELETE FROM employees",
+            "DELETE FROM departments",
+            "DELETE FROM positions"
+          ];
+
+          let clearedTables = 0;
+          clearQueries.forEach(query => {
+            db.run(query, (err) => {
+              if (err && !err.message.includes('no such table')) {
+                db.run("ROLLBACK");
+                return reject(err);
+              }
+
+              clearedTables++;
+              if (clearedTables === clearQueries.length) {
+                // Import data
+                importTables();
+              }
+            });
+          });
+
+          function importTables() {
+            const importOrder = [
+              'departments', 'positions', 'employees', 'ingredients',
+              'products', 'recipes', 'stock_entries', 'sale_orders',
+              'sale_order_items', 'attendance'
+            ];
+
+            let importedTables = 0;
+
+            importOrder.forEach(tableName => {
+              const tableData = data[tableName] || [];
+
+              if (tableData.length === 0) {
+                importedTables++;
+                if (importedTables === importOrder.length) {
+                  db.run("COMMIT", (commitErr) => {
+                    if (commitErr) reject(commitErr);
+                    else resolve("Import database thành công");
+                  });
+                }
+                return;
+              }
+
+              // Get table schema to build insert query
+              db.all(`PRAGMA table_info(${tableName})`, [], (err, columns) => {
+                if (err) {
+                  db.run("ROLLBACK");
+                  return reject(err);
+                }
+
+                if (columns.length === 0) {
+                  importedTables++;
+                  if (importedTables === importOrder.length) {
+                    db.run("COMMIT", (commitErr) => {
+                      if (commitErr) reject(commitErr);
+                      else resolve("Import database thành công");
+                    });
+                  }
+                  return;
+                }
+
+                const columnNames = columns.filter(col => col.name !== 'id').map(col => col.name);
+                const placeholders = columnNames.map(() => '?').join(',');
+                const insertQuery = `INSERT INTO ${tableName} (${columnNames.join(',')}) VALUES (${placeholders})`;
+
+                let insertedRows = 0;
+                tableData.forEach(row => {
+                  const values = columnNames.map(col => row[col]);
+
+                  db.run(insertQuery, values, (insertErr) => {
+                    if (insertErr) {
+                      console.error(`Error inserting into ${tableName}:`, insertErr);
+                    }
+
+                    insertedRows++;
+                    if (insertedRows === tableData.length) {
+                      importedTables++;
+                      if (importedTables === importOrder.length) {
+                        db.run("COMMIT", (commitErr) => {
+                          if (commitErr) reject(commitErr);
+                          else resolve("Import database thành công");
+                        });
+                      }
+                    }
+                  });
+                });
+              });
+            });
+          }
+        });
+      } catch (parseError) {
+        reject(new Error("Invalid JSON format"));
+      }
     });
   },
 };

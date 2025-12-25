@@ -77,5 +77,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
   getProfitLossReport: (date) => ipcRenderer.invoke('getProfitLossReport', date),
   getMonthlyProfitLossReport: (year, month) => ipcRenderer.invoke('getMonthlyProfitLossReport', year, month),
 
+  // Backup & Restore
+  backupDatabase: () => ipcRenderer.invoke('backupDatabase'),
+  restoreDatabase: () => ipcRenderer.invoke('restoreDatabase'),
+  exportDatabaseToJson: () => ipcRenderer.invoke('exportDatabaseToJson'),
+  importDatabaseFromJson: () => ipcRenderer.invoke('importDatabaseFromJson'),
 });
 

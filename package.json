@@ -16,7 +16,7 @@
     "test": "ng test",
     "electron": "electron .",
     "electron:start": "ng build --base-href ./ && electron .",
-    "electron:build": "npm run build && electron-builder --win --publish always"
+    "electron:build": "npm run build && electron-builder --win --publish never"
   },
   "private": true,
   "dependencies": {

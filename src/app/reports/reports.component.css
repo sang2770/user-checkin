@@ -102,7 +102,7 @@ mat-chip-listbox {
   .daily-stats {
     grid-template-columns: 1fr;
   }
-  
+
   .reports-container {
     padding: 12px;
   }
@@ -182,4 +182,87 @@ mat-chip-listbox {
   color: #333;
   font-size: 18px;
   font-weight: 500;
+}
+
+/* Backup & Restore Styles */
+.backup-restore-section {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-bottom: 20px;
+}
+
+.backup-section,
+.restore-section {
+  padding: 20px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  background: #fafafa;
+}
+
+.backup-section h4,
+.restore-section h4 {
+  margin: 0 0 8px 0;
+  color: #333;
+}
+
+.backup-section p,
+.restore-section p {
+  margin: 0 0 16px 0;
+  color: #666;
+  font-size: 14px;
+}
+
+.backup-actions,
+.restore-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.backup-actions button,
+.restore-actions button {
+  justify-content: flex-start;
+}
+
+.backup-actions button mat-icon,
+.restore-actions button mat-icon {
+  margin-right: 8px;
+}
+
+.backup-info {
+  grid-column: span 2;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px;
+  background: #e3f2fd;
+  border-radius: 8px;
+  border-left: 4px solid #2196f3;
+}
+
+.backup-info mat-icon {
+  color: #2196f3;
+  margin-top: 2px;
+}
+
+.backup-info ul {
+  margin: 8px 0 0 0;
+  padding-left: 20px;
+}
+
+.backup-info li {
+  margin-bottom: 4px;
+  font-size: 14px;
+  color: #333;
+}
+
+@media (max-width: 768px) {
+  .backup-restore-section {
+    grid-template-columns: 1fr;
+  }
+
+  .backup-info {
+    grid-column: span 1;
+  }
 }
