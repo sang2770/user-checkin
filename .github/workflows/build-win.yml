@@ -33,4 +33,4 @@ jobs:
         with:
           name: windows-exe
           path: |
-            dist/*.exe
+            release/*.exe
