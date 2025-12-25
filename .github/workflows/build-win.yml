@@ -1,4 +1,4 @@
-name: Build Electron Windows EXE
+name: Build & Release Electron Windows EXE
 
 on:
   push:
@@ -28,9 +28,13 @@ jobs:
       - name: Build Electron Windows
         run: npm run electron:build
 
-      - name: Upload EXE artifact
-        uses: actions/upload-artifact@v4
+      # 👉 TẠO GITHUB RELEASE + UPLOAD EXE
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
         with:
-          name: windows-exe
-          path: |
-            release/*.exe
+          tag_name: v${{ github.run_number }}
+          name: Windows Release v${{ github.run_number }}
+          files: |
+            release/**/*.exe
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
