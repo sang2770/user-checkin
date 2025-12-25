@@ -59,6 +59,7 @@ ipcMain.handle('getRecipesByProduct', async (_, productId) => await db.getRecipe
 ipcMain.handle('createRecipe', async (_, recipe) => await db.createRecipe(recipe));
 ipcMain.handle('updateRecipe', async (_, id, recipe) => await db.updateRecipe(id, recipe));
 ipcMain.handle('deleteRecipe', async (_, id) => await db.deleteRecipe(id));
+ipcMain.handle('createProductFromIngredient', async (_, ingredientId) => await db.createProductFromIngredient(ingredientId));
 
 // Stock Entries
 ipcMain.handle('getStockEntries', async () => await db.getStockEntries());

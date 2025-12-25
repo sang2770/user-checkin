@@ -1,8 +1,15 @@
 import { Injectable } from '@angular/core';
-import { IIngredient, IProduct, IRecipe, IStockEntry, ISaleOrder, ISaleOrderItem } from '../models/inventory.model';
+import {
+  IIngredient,
+  IProduct,
+  IRecipe,
+  IStockEntry,
+  ISaleOrder,
+  ISaleOrderItem,
+} from '../models/inventory.model';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class DatabaseService {
   constructor() {}
@@ -16,11 +23,16 @@ export class DatabaseService {
     return await (window as any).electronAPI.getIngredients();
   }
 
-  async createIngredient(ingredient: Omit<IIngredient, 'id'>): Promise<IIngredient> {
+  async createIngredient(
+    ingredient: Omit<IIngredient, 'id'>
+  ): Promise<IIngredient> {
     return await (window as any).electronAPI.createIngredient(ingredient);
   }
 
-  async updateIngredient(id: number, ingredient: Partial<IIngredient>): Promise<IIngredient> {
+  async updateIngredient(
+    id: number,
+    ingredient: Partial<IIngredient>
+  ): Promise<IIngredient> {
     return await (window as any).electronAPI.updateIngredient(id, ingredient);
   }
 
@@ -37,7 +49,10 @@ export class DatabaseService {
     return await (window as any).electronAPI.createProduct(product);
   }
 
-  async updateProduct(id: number, product: Partial<IProduct>): Promise<IProduct> {
+  async updateProduct(
+    id: number,
+    product: Partial<IProduct>
+  ): Promise<IProduct> {
     return await (window as any).electronAPI.updateProduct(id, product);
   }
 
@@ -66,12 +81,23 @@ export class DatabaseService {
     return await (window as any).electronAPI.deleteRecipe(id);
   }
 
+  // Create product from ingredient with 1:1 recipe
+  async createProductFromIngredient(
+    ingredientId: number
+  ): Promise<{ product: IProduct; recipe: IRecipe }> {
+    return await (window as any).electronAPI.createProductFromIngredient(
+      ingredientId
+    );
+  }
+
   // Stock Entry Management
   async getStockEntries(): Promise<IStockEntry[]> {
     return await (window as any).electronAPI.getStockEntries();
   }
 
-  async createStockEntry(stockEntry: Omit<IStockEntry, 'id'>): Promise<IStockEntry> {
+  async createStockEntry(
+    stockEntry: Omit<IStockEntry, 'id'>
+  ): Promise<IStockEntry> {
     return await (window as any).electronAPI.createStockEntry(stockEntry);
   }
 
@@ -80,7 +106,10 @@ export class DatabaseService {
     return await (window as any).electronAPI.getSaleOrders();
   }
 
-  async createSaleOrder(saleOrder: Omit<ISaleOrder, 'id'>, items: Omit<ISaleOrderItem, 'id' | 'saleOrderId'>[]): Promise<ISaleOrder> {
+  async createSaleOrder(
+    saleOrder: Omit<ISaleOrder, 'id'>,
+    items: Omit<ISaleOrderItem, 'id' | 'saleOrderId'>[]
+  ): Promise<ISaleOrder> {
     return await (window as any).electronAPI.createSaleOrder(saleOrder, items);
   }
 
@@ -110,7 +139,10 @@ export class DatabaseService {
   }
 
   async getMonthlyProfitLossReport(year: number, month: number): Promise<any> {
-    return await (window as any).electronAPI.getMonthlyProfitLossReport(year, month);
+    return await (window as any).electronAPI.getMonthlyProfitLossReport(
+      year,
+      month
+    );
   }
 
   // Import Sales from Excel

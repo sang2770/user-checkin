@@ -4,14 +4,24 @@
   <!-- Daily Report & Orders -->
   <mat-card class="report-card">
     <mat-card-header>
-      <mat-card-title style="margin-bottom: 10px;">Báo cáo ngày & Danh sách đơn hàng</mat-card-title>
+      <mat-card-title style="margin-bottom: 10px"
+        >Báo cáo ngày & Danh sách đơn hàng</mat-card-title
+      >
     </mat-card-header>
     <mat-card-content>
       <div class="date-picker">
         <mat-form-field appearance="outline">
           <mat-label>Chọn ngày báo cáo</mat-label>
-          <input matInput [matDatepicker]="picker" [(ngModel)]="selectedDate" (dateChange)="onDateChange()">
-          <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+          <input
+            matInput
+            [matDatepicker]="picker"
+            [(ngModel)]="selectedDate"
+            (dateChange)="onDateChange()"
+          />
+          <mat-datepicker-toggle
+            matSuffix
+            [for]="picker"
+          ></mat-datepicker-toggle>
           <mat-datepicker #picker></mat-datepicker>
         </mat-form-field>
       </div>
@@ -20,64 +30,77 @@
       <div *ngIf="!loading" class="daily-stats">
         <div class="stat-item">
           <div class="stat-label">Tổng đơn hàng</div>
-          <div class="stat-value">{{dailyReport.totalOrders || 0}}</div>
+          <div class="stat-value">{{ dailyReport.totalOrders || 0 }}</div>
         </div>
         <div class="stat-item">
           <div class="stat-label">Doanh thu</div>
-          <div class="stat-value revenue">{{formatCurrency(dailyReport.totalRevenue)}}</div>
+          <div class="stat-value revenue">
+            {{ formatCurrency(dailyReport.totalRevenue) }}
+          </div>
         </div>
         <div class="stat-item">
           <div class="stat-label">Lãi/Lỗ ròng</div>
-          <div class="stat-value" [class.profit]="(profitLossReport.netProfit || 0) >= 0"
-            [class.loss]="(profitLossReport.netProfit || 0) < 0">
-            {{formatCurrency(profitLossReport.netProfit)}}
+          <div
+            class="stat-value"
+            [class.profit]="(profitLossReport.netProfit || 0) >= 0"
+            [class.loss]="(profitLossReport.netProfit || 0) < 0"
+          >
+            {{ formatCurrency(profitLossReport.netProfit) }}
           </div>
         </div>
         <div class="stat-item">
           <div class="stat-label">Tỷ suất lợi nhuận</div>
-          <div class="stat-value">{{((profitLossReport.profitMargin || 0) * 100).toFixed(2)}}%</div>
+          <div class="stat-value">
+            {{ ((profitLossReport.profitMargin || 0) * 100).toFixed(2) }}%
+          </div>
         </div>
       </div>
 
       <!-- Daily Orders List -->
       <div class="section-divider">
-        <h4>Danh sách đơn hàng ngày {{selectedDate | date: 'dd/MM/yyyy'}}</h4>
+        <h4>
+          Danh sách đơn hàng ngày {{ selectedDate | date : "dd/MM/yyyy" }}
+        </h4>
       </div>
 
       <div *ngIf="!loadingOrders && dailyOrders.length > 0">
         <mat-table [dataSource]="dailyOrders" class="orders-table">
           <ng-container matColumnDef="id">
             <mat-header-cell *matHeaderCellDef>ID</mat-header-cell>
-            <mat-cell *matCellDef="let element">{{element.id}}</mat-cell>
+            <mat-cell *matCellDef="let element">{{ element.id }}</mat-cell>
           </ng-container>
 
           <ng-container matColumnDef="name">
             <mat-header-cell *matHeaderCellDef>Tên đơn hàng</mat-header-cell>
-            <mat-cell *matCellDef="let element">{{element.name}}</mat-cell>
+            <mat-cell *matCellDef="let element">{{ element.name }}</mat-cell>
           </ng-container>
 
           <ng-container matColumnDef="employeeName">
             <mat-header-cell *matHeaderCellDef>Nhân viên</mat-header-cell>
-            <mat-cell *matCellDef="let element">{{element.employeeName || 'N/A'}}</mat-cell>
+            <mat-cell *matCellDef="let element">{{
+              element.employeeName || "N/A"
+            }}</mat-cell>
           </ng-container>
 
           <ng-container matColumnDef="totalAmount">
             <mat-header-cell *matHeaderCellDef>Tổng tiền</mat-header-cell>
-            <mat-cell *matCellDef="let element">{{formatCurrency(element.totalAmount)}}</mat-cell>
+            <mat-cell *matCellDef="let element">{{
+              formatCurrency(element.totalAmount)
+            }}</mat-cell>
           </ng-container>
 
           <ng-container matColumnDef="date">
             <mat-header-cell *matHeaderCellDef>Ngày</mat-header-cell>
-            <mat-cell *matCellDef="let element">{{element.date}}</mat-cell>
+            <mat-cell *matCellDef="let element">{{ element.date }}</mat-cell>
           </ng-container>
 
           <ng-container matColumnDef="note">
             <mat-header-cell *matHeaderCellDef>Ghi chú</mat-header-cell>
-            <mat-cell *matCellDef="let element">{{element.note}}</mat-cell>
+            <mat-cell *matCellDef="let element">{{ element.note }}</mat-cell>
           </ng-container>
 
           <mat-header-row *matHeaderRowDef="orderColumns"></mat-header-row>
-          <mat-row *matRowDef="let row; columns: orderColumns;"></mat-row>
+          <mat-row *matRowDef="let row; columns: orderColumns"></mat-row>
         </mat-table>
       </div>
 
@@ -91,34 +114,62 @@
       </div>
 
       <!-- Top Products for selected date -->
-      <div *ngIf="dailyReport.topProducts && dailyReport.topProducts.length > 0" class="top-products">
-        <h4>Sản phẩm bán chạy ngày {{selectedDate | date: 'dd/MM/yyyy'}}</h4>
-        <mat-table [dataSource]="dailyReport.topProducts" class="products-table">
+      <div
+        *ngIf="dailyReport.topProducts && dailyReport.topProducts.length > 0"
+        class="top-products"
+      >
+        <h4 style="font-size: 18px !important; margin-top: 10px">
+          Sản phẩm bán chạy ngày {{ selectedDate | date : "dd/MM/yyyy" }}
+        </h4>
+        <mat-table
+          [dataSource]="dailyReport.topProducts"
+          class="products-table"
+        >
           <ng-container matColumnDef="name">
             <mat-header-cell *matHeaderCellDef>Sản phẩm</mat-header-cell>
-            <mat-cell *matCellDef="let element">{{element.name}}</mat-cell>
+            <mat-cell *matCellDef="let element">{{ element.name }}</mat-cell>
           </ng-container>
 
           <ng-container matColumnDef="totalQuantity">
             <mat-header-cell *matHeaderCellDef>Số lượng</mat-header-cell>
-            <mat-cell *matCellDef="let element">{{element.totalQuantity}}</mat-cell>
+            <mat-cell *matCellDef="let element">{{
+              element.totalQuantity
+            }}</mat-cell>
           </ng-container>
 
           <ng-container matColumnDef="totalRevenue">
             <mat-header-cell *matHeaderCellDef>Doanh thu</mat-header-cell>
-            <mat-cell *matCellDef="let element">{{formatCurrency(element.totalRevenue)}}</mat-cell>
+            <mat-cell *matCellDef="let element">{{
+              formatCurrency(element.totalRevenue)
+            }}</mat-cell>
           </ng-container>
 
-          <mat-header-row *matHeaderRowDef="['name', 'totalQuantity', 'totalRevenue']"></mat-header-row>
-          <mat-row *matRowDef="let row; columns: ['name', 'totalQuantity', 'totalRevenue'];"></mat-row>
+          <mat-header-row
+            *matHeaderRowDef="['name', 'totalQuantity', 'totalRevenue']"
+          ></mat-header-row>
+          <mat-row
+            *matRowDef="
+              let row;
+              columns: ['name', 'totalQuantity', 'totalRevenue']
+            "
+          ></mat-row>
         </mat-table>
       </div>
 
-      <div *ngIf="dailyReport.lowStockAlerts && dailyReport.lowStockAlerts.length > 0" class="alerts">
+      <div
+        *ngIf="
+          dailyReport.lowStockAlerts && dailyReport.lowStockAlerts.length > 0
+        "
+        class="alerts"
+      >
         <h4>Cảnh báo tồn kho</h4>
         <mat-chip-listbox>
-          <mat-chip *ngFor="let item of dailyReport.lowStockAlerts" color="warn" selected>
-            {{item.name}}: {{item.currentStock}} {{item.unit}}
+          <mat-chip
+            *ngFor="let item of dailyReport.lowStockAlerts"
+            color="warn"
+            selected
+          >
+            {{ item.name }}: {{ item.currentStock }} {{ item.unit }}
           </mat-chip>
         </mat-chip-listbox>
       </div>
@@ -128,20 +179,38 @@
   <!-- Monthly Profit/Loss Report -->
   <mat-card class="report-card">
     <mat-card-header>
-      <mat-card-title style="margin-bottom: 10px;">Báo cáo lãi/lỗ theo tháng</mat-card-title>
+      <mat-card-title style="margin-bottom: 10px"
+        >Báo cáo lãi/lỗ theo tháng</mat-card-title
+      >
     </mat-card-header>
     <mat-card-content>
       <div class="month-picker">
         <div class="month-year-inputs">
           <mat-form-field appearance="outline" class="month-input">
             <mat-label>Tháng</mat-label>
-            <input matInput type="number" min="1" max="12" [(ngModel)]="selectedMonth">
+            <input
+              matInput
+              type="number"
+              min="1"
+              max="12"
+              [(ngModel)]="selectedMonth"
+            />
           </mat-form-field>
           <mat-form-field appearance="outline" class="year-input">
             <mat-label>Năm</mat-label>
-            <input matInput type="number" min="2020" max="2030" [(ngModel)]="selectedYear">
+            <input
+              matInput
+              type="number"
+              min="2020"
+              max="2030"
+              [(ngModel)]="selectedYear"
+            />
           </mat-form-field>
-          <button mat-raised-button color="primary" (click)="loadMonthlyProfitLoss()">
+          <button
+            mat-raised-button
+            color="primary"
+            (click)="loadMonthlyProfitLoss()"
+          >
             Tải báo cáo
           </button>
         </div>
@@ -150,22 +219,31 @@
       <div *ngIf="!loadingMonthly" class="monthly-stats">
         <div class="stat-item">
           <div class="stat-label">Tổng doanh thu tháng</div>
-          <div class="stat-value revenue">{{formatCurrency(monthlyProfitLossReport.totalRevenue)}}</div>
+          <div class="stat-value revenue">
+            {{ formatCurrency(monthlyProfitLossReport.totalRevenue) }}
+          </div>
         </div>
         <div class="stat-item">
           <div class="stat-label">Tổng chi phí tháng</div>
-          <div class="stat-value cost">{{formatCurrency(monthlyProfitLossReport.totalCost)}}</div>
+          <div class="stat-value cost">
+            {{ formatCurrency(monthlyProfitLossReport.totalCost) }}
+          </div>
         </div>
         <div class="stat-item">
           <div class="stat-label">Lãi/Lỗ ròng tháng</div>
-          <div class="stat-value" [class.profit]="(monthlyProfitLossReport.netProfit || 0) >= 0"
-            [class.loss]="(monthlyProfitLossReport.netProfit || 0) < 0">
-            {{formatCurrency(monthlyProfitLossReport.netProfit)}}
+          <div
+            class="stat-value"
+            [class.profit]="(monthlyProfitLossReport.netProfit || 0) >= 0"
+            [class.loss]="(monthlyProfitLossReport.netProfit || 0) < 0"
+          >
+            {{ formatCurrency(monthlyProfitLossReport.netProfit) }}
           </div>
         </div>
         <div class="stat-item">
           <div class="stat-label">Số đơn hàng</div>
-          <div class="stat-value">{{monthlyProfitLossReport.totalOrders || 0}}</div>
+          <div class="stat-value">
+            {{ monthlyProfitLossReport.totalOrders || 0 }}
+          </div>
         </div>
       </div>
       <div *ngIf="loadingMonthly" class="loading-inline">
@@ -181,29 +259,50 @@
       <mat-card-title>Báo cáo tồn kho</mat-card-title>
     </mat-card-header>
     <mat-card-content>
-      <mat-table [dataSource]="inventoryReport" *ngIf="!loading && inventoryReport.length > 0">
+      <mat-table
+        [dataSource]="inventoryReport"
+        *ngIf="!loading && inventoryReport.length > 0"
+      >
         <ng-container matColumnDef="name">
           <mat-header-cell *matHeaderCellDef>Nguyên liệu</mat-header-cell>
-          <mat-cell *matCellDef="let element">{{element.name}}</mat-cell>
+          <mat-cell *matCellDef="let element">{{ element.name }}</mat-cell>
         </ng-container>
 
         <ng-container matColumnDef="currentStock">
           <mat-header-cell *matHeaderCellDef>Tồn kho</mat-header-cell>
-          <mat-cell *matCellDef="let element">{{element.currentStock}} {{element.unit}}</mat-cell>
+          <mat-cell *matCellDef="let element"
+            >{{ element.currentStock }} {{ element.unit }}</mat-cell
+          >
         </ng-container>
 
         <ng-container matColumnDef="totalInValue">
           <mat-header-cell *matHeaderCellDef>Giá trị nhập</mat-header-cell>
-          <mat-cell *matCellDef="let element">{{formatCurrency(element.totalInValue)}}</mat-cell>
+          <mat-cell *matCellDef="let element">{{
+            formatCurrency(element.totalInValue)
+          }}</mat-cell>
         </ng-container>
 
         <ng-container matColumnDef="currentValue">
           <mat-header-cell *matHeaderCellDef>Giá trị hiện tại</mat-header-cell>
-          <mat-cell *matCellDef="let element">{{formatCurrency(element.currentValue)}}</mat-cell>
+          <mat-cell *matCellDef="let element">{{
+            formatCurrency(element.currentValue)
+          }}</mat-cell>
         </ng-container>
 
-        <mat-header-row *matHeaderRowDef="['name', 'currentStock', 'totalInValue', 'currentValue']"></mat-header-row>
-        <mat-row *matRowDef="let row; columns: ['name', 'currentStock', 'totalInValue', 'currentValue'];"></mat-row>
+        <mat-header-row
+          *matHeaderRowDef="[
+            'name',
+            'currentStock',
+            'totalInValue',
+            'currentValue'
+          ]"
+        ></mat-header-row>
+        <mat-row
+          *matRowDef="
+            let row;
+            columns: ['name', 'currentStock', 'totalInValue', 'currentValue']
+          "
+        ></mat-row>
       </mat-table>
 
       <div *ngIf="inventoryReport.length === 0 && !loading" class="no-data">

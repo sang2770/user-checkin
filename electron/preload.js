@@ -36,7 +36,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   setSetting: (key, value) => ipcRenderer.invoke('setSetting', key, value),
 
   // ================ INVENTORY MANAGEMENT ================
-  
+
   // Ingredients
   getIngredients: () => ipcRenderer.invoke('getIngredients'),
   createIngredient: (ingredient) => ipcRenderer.invoke('createIngredient', ingredient),
@@ -55,6 +55,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   createRecipe: (recipe) => ipcRenderer.invoke('createRecipe', recipe),
   updateRecipe: (id, recipe) => ipcRenderer.invoke('updateRecipe', id, recipe),
   deleteRecipe: (id) => ipcRenderer.invoke('deleteRecipe', id),
+  createProductFromIngredient: (ingredientId) => ipcRenderer.invoke('createProductFromIngredient', ingredientId),
 
   // Stock Entries
   getStockEntries: () => ipcRenderer.invoke('getStockEntries'),
@@ -64,7 +65,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   getSaleOrders: () => ipcRenderer.invoke('getSaleOrders'),
   createSaleOrder: (saleOrder, items) => ipcRenderer.invoke('createSaleOrder', saleOrder, items),
   getSaleOrderItems: (saleOrderId) => ipcRenderer.invoke('getSaleOrderItems', saleOrderId),
-  
+
   // Import Sales from Excel
   importSalesFromExcel: (fileBuffer) => ipcRenderer.invoke('importSalesFromExcel', fileBuffer),
   clearSalesHistory: () => ipcRenderer.invoke('clearSalesHistory'),
@@ -75,6 +76,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
   getOrdersByDate: (date) => ipcRenderer.invoke('getOrdersByDate', date),
   getProfitLossReport: (date) => ipcRenderer.invoke('getProfitLossReport', date),
   getMonthlyProfitLossReport: (year, month) => ipcRenderer.invoke('getMonthlyProfitLossReport', year, month),
-  
+
 });
 

@@ -2,7 +2,9 @@ const { Database } = require("sqlite3").verbose();
 const { app } = require("electron");
 const path = require("path");
 const XLSX = require("xlsx");
-const dbPath = path.join(app.getPath("userData"), "employees.db");
+// const dbPath = path.join(app.getPath("userData"), "employees.db");
+const dbPath = path.join(path.dirname(__dirname), "employees.db");
+
 console.log("DB Path:", dbPath);
 
 const db = new Database(dbPath, (err) => {
@@ -319,6 +321,101 @@ module.exports = {
     });
   },
 
+  // Create product from ingredient with 1:1 recipe
+  createProductFromIngredient: (ingredientId) => {
+    return new Promise((resolve, reject) => {
+      db.serialize(() => {
+        db.run("BEGIN TRANSACTION");
+
+        // Get ingredient info
+        db.get(
+          "SELECT * FROM ingredients WHERE id = ?",
+          [ingredientId],
+          (err, ingredient) => {
+            if (err) {
+              db.run("ROLLBACK");
+              return reject(err);
+            }
+
+            if (!ingredient) {
+              db.run("ROLLBACK");
+              return reject(new Error('Không tìm thấy nguyên liệu'));
+            }
+
+            // Create product with retail price (cost price + 20% margin)
+            const retailPrice = Math.ceil(ingredient.costPrice * 1.2);
+            const productData = {
+              name: ingredient.name,
+              code: `RT-${ingredient.code || ingredient.name.replace(/\s+/g, '-')}`,
+              price: retailPrice,
+              category: 'Bán lẻ',
+              isActive: 1
+            };
+
+            db.run(
+              `INSERT INTO products (name, code, price, category, isActive) 
+               VALUES (?, ?, ?, ?, ?)`,
+              [
+                productData.name,
+                productData.code,
+                productData.price,
+                productData.category,
+                productData.isActive
+              ],
+              function (err) {
+                if (err) {
+                  db.run("ROLLBACK");
+                  return reject(err);
+                }
+
+                const productId = this.lastID;
+
+                // Create 1:1 recipe
+                const recipeData = {
+                  name: `Công thức ${ingredient.name}`,
+                  productId: productId,
+                  ingredientId: ingredientId,
+                  quantity: 1 // 1:1 ratio
+                };
+
+                db.run(
+                  `INSERT INTO recipes (name, productId, ingredientId, quantity) 
+                   VALUES (?, ?, ?, ?)`,
+                  [
+                    recipeData.name,
+                    recipeData.productId,
+                    recipeData.ingredientId,
+                    recipeData.quantity
+                  ],
+                  function (err) {
+                    if (err) {
+                      db.run("ROLLBACK");
+                      return reject(err);
+                    }
+
+                    const recipeId = this.lastID;
+
+                    db.run("COMMIT", (commitErr) => {
+                      if (commitErr) {
+                        db.run("ROLLBACK");
+                        return reject(commitErr);
+                      }
+
+                      resolve({
+                        product: { id: productId, ...productData },
+                        recipe: { id: recipeId, ...recipeData }
+                      });
+                    });
+                  }
+                );
+              }
+            );
+          }
+        );
+      });
+    });
+  },
+
   // Stock Entry Management
   getStockEntries: () => {
     return new Promise((resolve, reject) => {
@@ -341,45 +438,69 @@ module.exports = {
       db.serialize(() => {
         db.run("BEGIN TRANSACTION");
 
-        // Insert stock entry
-        db.run(
-          `INSERT INTO stock_entries (name, date, ingredientId, quantity, unitPrice, totalCost, supplier, note) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-          [
-            stockEntry.name || "",
-            stockEntry.date,
-            stockEntry.ingredientId,
-            stockEntry.quantity,
-            stockEntry.unitPrice,
-            stockEntry.totalCost,
-            stockEntry.supplier,
-            stockEntry.note,
-          ],
-          function (err) {
+        // Get current ingredient info for weighted average cost calculation
+        db.get(
+          `SELECT currentStock, costPrice FROM ingredients WHERE id = ?`,
+          [stockEntry.ingredientId],
+          (err, ingredient) => {
             if (err) {
               db.run("ROLLBACK");
               return reject(err);
             }
 
-            const stockEntryId = this.lastID;
+            // Calculate new weighted average cost price
+            const oldStock = ingredient.currentStock || 0;
+            const oldCostPrice = ingredient.costPrice || 0;
+            const newQuantity = stockEntry.quantity;
+            const newUnitPrice = stockEntry.unitPrice;
 
-            // Update ingredient stock
+            const totalOldValue = oldStock * oldCostPrice;
+            const totalNewValue = newQuantity * newUnitPrice;
+            const newTotalStock = oldStock + newQuantity;
+            const newCostPrice = newTotalStock > 0 ?
+              (totalOldValue + totalNewValue) / newTotalStock : newUnitPrice;
+
+            // Insert stock entry
             db.run(
-              `UPDATE ingredients SET currentStock = currentStock + ? WHERE id = ?`,
-              [stockEntry.quantity, stockEntry.ingredientId],
-              (err) => {
+              `INSERT INTO stock_entries (name, date, ingredientId, quantity, unitPrice, totalCost, supplier, note) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+              [
+                stockEntry.name || "",
+                stockEntry.date,
+                stockEntry.ingredientId,
+                stockEntry.quantity,
+                stockEntry.unitPrice,
+                stockEntry.totalCost,
+                stockEntry.supplier,
+                stockEntry.note,
+              ],
+              function (err) {
                 if (err) {
                   db.run("ROLLBACK");
                   return reject(err);
                 }
 
-                db.run("COMMIT", (commitErr) => {
-                  if (commitErr) {
-                    db.run("ROLLBACK");
-                    return reject(commitErr);
+                const stockEntryId = this.lastID;
+
+                // Update ingredient stock and cost price with weighted average
+                db.run(
+                  `UPDATE ingredients SET currentStock = currentStock + ?, costPrice = ? WHERE id = ?`,
+                  [stockEntry.quantity, newCostPrice, stockEntry.ingredientId],
+                  (err) => {
+                    if (err) {
+                      db.run("ROLLBACK");
+                      return reject(err);
+                    }
+
+                    db.run("COMMIT", (commitErr) => {
+                      if (commitErr) {
+                        db.run("ROLLBACK");
+                        return reject(commitErr);
+                      }
+                      resolve({ id: stockEntryId, ...stockEntry });
+                    });
                   }
-                  resolve({ id: stockEntryId, ...stockEntry });
-                });
+                );
               }
             );
           }
@@ -563,8 +684,6 @@ module.exports = {
   getDailyReport: (date) => {
     return new Promise((resolve, reject) => {
       const target = module.exports.formatDateToLocalDate(date);
-      console.log("Formatted date:", target);
-
       const queries = {
         sales: `SELECT COUNT(*) as totalOrders, SUM(totalAmount) as totalRevenue
                 FROM sale_orders WHERE strftime('%d/%m/%Y', date) = ?`,
@@ -754,8 +873,7 @@ module.exports = {
                     })
                     .catch((err) => {
                       errors.push(
-                        `Dòng ${index + 2}: Không thể tạo sản phẩm - ${
-                          err.message
+                        `Dòng ${index + 2}: Không thể tạo sản phẩm - ${err.message
                         }`
                       );
                       processRow(index + 1);
@@ -819,7 +937,7 @@ module.exports = {
       db.run(
         "INSERT INTO sale_orders (name, date, employeeName, totalAmount, note) VALUES (?, ?, ?, ?, ?)",
         [
-          `Order Import ${Date.now()}`,
+          product.name || " " + this.formatDateToLocalDate(saleDate),
           formattedDate,
           employee,
           totalAmount,
@@ -919,15 +1037,14 @@ module.exports = {
 
   // Get profit/loss report for a specific date
   getProfitLossReport: (date) => {
+    const target = module.exports.formatDateToLocalDate(date);
     return new Promise((resolve, reject) => {
       // Get total revenue for the date
       db.get(
-        `SELECT SUM(totalAmount) as totalRevenue, COUNT(*) as totalOrders FROM sale_orders WHERE date = ?`,
-        [date],
+        `SELECT SUM(totalAmount) as totalRevenue, COUNT(*) as totalOrders FROM sale_orders WHERE strftime('%d/%m/%Y', date) = ?`,
+        [target],
         (err, revenueData) => {
           if (err) return reject(err);
-
-          // Calculate total ingredient costs for products sold on this date
           db.get(
             `
           SELECT SUM(
@@ -937,9 +1054,9 @@ module.exports = {
           LEFT JOIN sale_orders so ON soi.saleOrderId = so.id
           LEFT JOIN recipes r ON soi.productId = r.productId
           LEFT JOIN ingredients i ON r.ingredientId = i.id
-          WHERE so.date = ?
+          WHERE strftime('%d/%m/%Y', so.date) = ?
         `,
-            [date],
+            [target],
             (err, costData) => {
               if (err) return reject(err);
 
@@ -948,7 +1065,8 @@ module.exports = {
               const netProfit = totalRevenue - totalCost;
               const profitMargin =
                 totalRevenue > 0 ? netProfit / totalRevenue : 0;
-
+              // console.log("getProfitLossReport - date:", date, "target:", target);
+              // console.log("totalRevenue:", totalRevenue, "totalCost:", totalCost);
               resolve({
                 date,
                 totalRevenue,
@@ -970,7 +1088,7 @@ module.exports = {
       const startDate = `${year}-${month.toString().padStart(2, "0")}-01`;
       const endDate = `${year}-${month.toString().padStart(2, "0")}-31`;
       console.log(startDate, endDate);
-      
+
       // Get total revenue for the month
       db.get(
         `

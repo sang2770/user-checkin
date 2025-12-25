@@ -9,11 +9,20 @@ import { IngredientDialogComponent } from './ingredient-dialog.component';
 @Component({
   selector: 'app-ingredients',
   templateUrl: './ingredients.component.html',
-  styleUrls: ['./ingredients.component.css']
+  styleUrls: ['./ingredients.component.css'],
 })
 export class IngredientsComponent implements OnInit {
   ingredients: IIngredient[] = [];
-  displayedColumns: string[] = ['name', 'code', 'unit', 'currentStock', 'costPrice', 'lowStockAlert', 'actions'];
+  products: any[] = []; // Add products list to check duplicates
+  displayedColumns: string[] = [
+    'name',
+    'code',
+    'unit',
+    'currentStock',
+    'costPrice',
+    'lowStockAlert',
+    'actions',
+  ];
   loading = false;
 
   constructor(
@@ -24,7 +33,11 @@ export class IngredientsComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.loadIngredients();
+    this.loadData();
+  }
+
+  async loadData() {
+    await Promise.all([this.loadIngredients(), this.loadProducts()]);
   }
 
   async loadIngredients() {
@@ -32,9 +45,19 @@ export class IngredientsComponent implements OnInit {
     try {
       this.ingredients = await this.databaseService.getIngredients();
     } catch (error) {
-      this.snackBar.open('Lỗi khi tải danh sách nguyên liệu', 'Đóng', { duration: 3000 });
+      this.snackBar.open('Lỗi khi tải danh sách nguyên liệu', 'Đóng', {
+        duration: 3000,
+      });
     } finally {
       this.loading = false;
+    }
+  }
+
+  async loadProducts() {
+    try {
+      this.products = await this.databaseService.getProducts();
+    } catch (error) {
+      console.error('Error loading products:', error);
     }
   }
 
@@ -42,10 +65,14 @@ export class IngredientsComponent implements OnInit {
     this.loading = true;
     try {
       await this.dataSeederService.seedInitialData();
-      this.snackBar.open('Import dữ liệu mẫu thành công', 'Đóng', { duration: 3000 });
+      this.snackBar.open('Import dữ liệu mẫu thành công', 'Đóng', {
+        duration: 3000,
+      });
       this.loadIngredients();
     } catch (error) {
-      this.snackBar.open('Lỗi khi import dữ liệu mẫu', 'Đóng', { duration: 3000 });
+      this.snackBar.open('Lỗi khi import dữ liệu mẫu', 'Đóng', {
+        duration: 3000,
+      });
     } finally {
       this.loading = false;
     }
@@ -54,10 +81,10 @@ export class IngredientsComponent implements OnInit {
   openDialog(ingredient?: IIngredient) {
     const dialogRef = this.dialog.open(IngredientDialogComponent, {
       width: '500px',
-      data: ingredient ? { ...ingredient } : null
+      data: ingredient ? { ...ingredient } : null,
     });
 
-    dialogRef.afterClosed().subscribe(result => {
+    dialogRef.afterClosed().subscribe((result) => {
       if (result) {
         if (result.id) {
           this.updateIngredient(result.id, result);
@@ -71,20 +98,28 @@ export class IngredientsComponent implements OnInit {
   async createIngredient(ingredient: Omit<IIngredient, 'id'>) {
     try {
       await this.databaseService.createIngredient(ingredient);
-      this.snackBar.open('Thêm nguyên liệu thành công', 'Đóng', { duration: 3000 });
-      this.loadIngredients();
+      this.snackBar.open('Thêm nguyên liệu thành công', 'Đóng', {
+        duration: 3000,
+      });
+      this.loadData();
     } catch (error) {
-      this.snackBar.open('Lỗi khi thêm nguyên liệu', 'Đóng', { duration: 3000 });
+      this.snackBar.open('Lỗi khi thêm nguyên liệu', 'Đóng', {
+        duration: 3000,
+      });
     }
   }
 
   async updateIngredient(id: number, ingredient: Partial<IIngredient>) {
     try {
       await this.databaseService.updateIngredient(id, ingredient);
-      this.snackBar.open('Cập nhật nguyên liệu thành công', 'Đóng', { duration: 3000 });
-      this.loadIngredients();
+      this.snackBar.open('Cập nhật nguyên liệu thành công', 'Đóng', {
+        duration: 3000,
+      });
+      this.loadData();
     } catch (error) {
-      this.snackBar.open('Lỗi khi cập nhật nguyên liệu', 'Đóng', { duration: 3000 });
+      this.snackBar.open('Lỗi khi cập nhật nguyên liệu', 'Đóng', {
+        duration: 3000,
+      });
     }
   }
 
@@ -92,15 +127,53 @@ export class IngredientsComponent implements OnInit {
     if (confirm(`Bạn có chắc chắn muốn xóa "${ingredient.name}"?`)) {
       try {
         await this.databaseService.deleteIngredient(ingredient.id!);
-        this.snackBar.open('Xóa nguyên liệu thành công', 'Đóng', { duration: 3000 });
-        this.loadIngredients();
+        this.snackBar.open('Xóa nguyên liệu thành công', 'Đóng', {
+          duration: 3000,
+        });
+        this.loadData();
       } catch (error) {
-        this.snackBar.open('Lỗi khi xóa nguyên liệu', 'Đóng', { duration: 3000 });
+        this.snackBar.open('Lỗi khi xóa nguyên liệu', 'Đóng', {
+          duration: 3000,
+        });
+      }
+    }
+  }
+
+  async createProductFromIngredient(ingredient: IIngredient) {
+    if (confirm(`Tạo sản phẩm bán lẻ từ nguyên liệu "${ingredient.name}"?`)) {
+      this.loading = true;
+      try {
+        const result = await this.databaseService.createProductFromIngredient(
+          ingredient.id!
+        );
+        this.snackBar.open(
+          `Đã tạo sản phẩm "${result.product.name}" và công thức thành công`,
+          'Đóng',
+          { duration: 5000 }
+        );
+        this.loadData(); // Reload data to update product list
+      } catch (error) {
+        this.snackBar.open('Lỗi khi tạo sản phẩm từ nguyên liệu', 'Đóng', {
+          duration: 3000,
+        });
+        console.error('Error creating product from ingredient:', error);
+      } finally {
+        this.loading = false;
       }
     }
   }
 
   isLowStock(ingredient: IIngredient): boolean {
-    return !!(ingredient.lowStockAlert && ingredient.lowStockAlert > 0 && ingredient.currentStock <= ingredient.lowStockAlert);
+    return !!(
+      ingredient.lowStockAlert &&
+      ingredient.lowStockAlert > 0 &&
+      ingredient.currentStock <= ingredient.lowStockAlert
+    );
+  }
+
+  hasProductWithSameName(ingredient: IIngredient): boolean {
+    return this.products.some(
+      (product) => product.name.toLowerCase() === ingredient.name?.toLowerCase()
+    );
   }
 }
