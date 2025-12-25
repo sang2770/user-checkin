@@ -1,0 +1,138 @@
+<div class="recipes-container">
+  <h2>
+    <mat-icon>restaurant_menu</mat-icon>
+    Quản Lý Công Thức
+  </h2>
+  
+  <div class="toolbar">
+    <button mat-raised-button color="primary" (click)="openCreateDialog()" [disabled]="loading">
+      <mat-icon>add</mat-icon>
+      Thêm Công Thức
+    </button>
+    
+    <button mat-stroked-button (click)="seedSampleRecipes()" [disabled]="loading">
+      <mat-icon>auto_fix_high</mat-icon>
+      Tạo Dữ Liệu Mẫu
+    </button>
+  </div>
+
+  <div *ngIf="loading" class="loading">
+    <mat-spinner></mat-spinner>
+    <p>Đang tải dữ liệu...</p>
+  </div>
+
+  <div *ngIf="!loading" class="content">
+    <!-- Recipe Table -->
+    <mat-card class="table-card" *ngIf="recipes.length > 0">
+      <mat-card-header>
+        <mat-card-title>Danh Sách Công Thức ({{ recipes.length }})</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <table mat-table [dataSource]="recipes" class="full-width-table">
+          <ng-container matColumnDef="productName">
+            <th mat-header-cell *matHeaderCellDef>Sản Phẩm</th>
+            <td mat-cell *matCellDef="let recipe">{{ getProductName(recipe.productId) }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="ingredientName">
+            <th mat-header-cell *matHeaderCellDef>Nguyên Liệu</th>
+            <td mat-cell *matCellDef="let recipe">{{ getIngredientName(recipe.ingredientId) }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="quantity">
+            <th mat-header-cell *matHeaderCellDef>Số Lượng</th>
+            <td mat-cell *matCellDef="let recipe">{{ recipe.quantity }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="unit">
+            <th mat-header-cell *matHeaderCellDef>Đơn Vị</th>
+            <td mat-cell *matCellDef="let recipe">{{ getIngredientUnit(recipe.ingredientId) }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef>Thao Tác</th>
+            <td mat-cell *matCellDef="let recipe">
+              <button mat-icon-button (click)="openEditDialog(recipe)" matTooltip="Chỉnh sửa">
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button mat-icon-button color="warn" (click)="deleteRecipe(recipe)" matTooltip="Xóa">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+        </table>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Grouped Recipes by Product -->
+    <mat-card class="grouped-recipes" *ngIf="recipes.length > 0">
+      <mat-card-header>
+        <mat-card-title>Công Thức Theo Sản Phẩm</mat-card-title>
+        <mat-card-subtitle>Hiển thị tất cả nguyên liệu cần thiết cho mỗi món</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="recipe-groups">
+          <div *ngFor="let group of getRecipesByProduct()" class="recipe-group">
+            <div class="product-header">
+              <div class="product-info">
+                <h3>{{ group.productName }}</h3>
+                <span class="product-price">{{ group.productPrice | currency:'VND':'symbol':'1.0-0' }}</span>
+              </div>
+              <div class="product-actions">
+                <button mat-icon-button 
+                        (click)="openCreateDialog(group.productId)" 
+                        matTooltip="Thêm nguyên liệu cho món này"
+                        color="primary">
+                  <mat-icon>add_circle</mat-icon>
+                </button>
+              </div>
+            </div>
+            
+            <div class="recipe-formula">
+              <div class="formula-text">
+                <strong>1 {{ group.productName }}</strong> = 
+                <span class="ingredients-list">
+                  <span *ngFor="let ingredient of group.ingredients; let last = last" class="ingredient-item">
+                    <strong>{{ ingredient.quantity }} {{ ingredient.unit }}</strong> {{ ingredient.ingredientName }}
+                    <span *ngIf="!last" class="separator"> + </span>
+                  </span>
+                </span>
+              </div>
+            </div>
+            
+            <div class="ingredients-detail">
+              <div *ngFor="let ingredient of group.ingredients" class="ingredient-detail-item">
+                <div class="ingredient-info">
+                  <span class="ingredient-name">{{ ingredient.ingredientName }}</span>
+                  <span class="ingredient-quantity">{{ ingredient.quantity }} {{ ingredient.unit }}</span>
+                </div>
+                <div class="ingredient-actions">
+                  <button mat-icon-button (click)="openEditDialog(ingredient.recipe)" matTooltip="Chỉnh sửa">
+                    <mat-icon>edit</mat-icon>
+                  </button>
+                  <button mat-icon-button color="warn" (click)="deleteRecipe(ingredient.recipe)" matTooltip="Xóa">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- No Data -->
+    <div *ngIf="recipes.length === 0" class="no-data">
+      <mat-icon>restaurant_menu</mat-icon>
+      <h3>Chưa có công thức nào</h3>
+      <p>Thêm công thức để định lượng nguyên liệu cho từng món ăn</p>
+      <button mat-raised-button color="primary" (click)="openCreateDialog()">
+        <mat-icon>add</mat-icon>
+        Thêm Công Thức Đầu Tiên
+      </button>
+    </div>
+  </div>
+</div>

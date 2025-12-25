@@ -1,0 +1,27 @@
+.dialog-container {
+  min-width: 500px;
+}
+
+.ingredient-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.form-row {
+  display: flex;
+  gap: 16px;
+}
+
+.form-row mat-form-field {
+  flex: 1;
+}
+
+mat-form-field {
+  width: 100%;
+}
+
+mat-dialog-actions {
+  margin-top: 20px;
+  gap: 8px;
+}

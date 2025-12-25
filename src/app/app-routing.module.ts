@@ -1,31 +1,40 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { UserManagerComponent } from './user-manager/user-manager.component';
-import { UserCheckinComponent } from './user-checkin/user-checkin.component';
-import { DepartmentComponent } from './department/department.component';
-import { PositionComponent } from './position/position.component';
-import { DevicesManagerComponent } from './devices-manager/devices-manager.component';
+import { IngredientsComponent } from './ingredients/ingredients.component';
+import { ProductsComponent } from './products/products.component';
+import { RecipesComponent } from './recipes/recipes.component';
+import { ImportSalesComponent } from './import-sales/import-sales.component';
+import { ReportsComponent } from './reports/reports.component';
+import { StockEntriesComponent } from './stock-entries/stock-entries.component';
 
 const routes: Routes = [
   {
     path: '',
-    component: UserManagerComponent
+    component: ReportsComponent
   },
   {
-    path: 'checkin',
-    component: UserCheckinComponent
+    path: 'reports',
+    component: ReportsComponent
   },
   {
-    path: 'department',
-    component: DepartmentComponent
+    path: 'ingredients',
+    component: IngredientsComponent
   },
   {
-    path: 'position',
-    component: PositionComponent
+    path: 'products',
+    component: ProductsComponent
   },
   {
-    path: 'devices',
-    component: DevicesManagerComponent
+    path: 'recipes',
+    component: RecipesComponent
+  },
+  {
+    path: 'import-sales',
+    component: ImportSalesComponent
+  },
+  {
+    path: 'stock-entries',
+    component: StockEntriesComponent
   }
 ];
 

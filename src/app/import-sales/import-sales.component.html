@@ -1,0 +1,89 @@
+<div class="import-sales-container">
+  <mat-card class="import-card">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>upload_file</mat-icon>
+        Import File Excel Doanh Thu
+      </mat-card-title>
+      <mat-card-subtitle>
+        Chọn file Excel để import dữ liệu doanh thu và cập nhật tồn kho
+      </mat-card-subtitle>
+    </mat-card-header>
+    
+    <mat-card-content>
+      <div class="file-upload">
+        <input
+          type="file"
+          id="fileInput"
+          accept=".xlsx,.xls"
+          (change)="onFileSelected($event)"
+          hidden
+        />
+        
+        <div class="upload-area" (click)="clickFileInput()">
+          <mat-icon class="upload-icon">cloud_upload</mat-icon>
+          <p *ngIf="!selectedFile">Nhấp để chọn file Excel</p>
+          <p *ngIf="selectedFile" class="selected-file">{{ selectedFile.name }}</p>
+        </div>
+      </div>
+      
+      <div class="upload-actions" *ngIf="selectedFile">
+        <button mat-raised-button color="primary" (click)="importSalesData()" [disabled]="loading">
+          <mat-icon *ngIf="!loading">upload</mat-icon>
+          <mat-spinner *ngIf="loading" diameter="20"></mat-spinner>
+          {{ loading ? 'Đang import...' : 'Import Doanh Thu' }}
+        </button>
+        
+        <button mat-button (click)="clearSelectedFile()">
+          Hủy
+        </button>
+      </div>
+      
+      <div class="file-format-info">
+        <mat-icon>info</mat-icon>
+        <div class="format-details">
+          <p><strong>Định dạng file Excel:</strong></p>
+          <ul>
+            <li><strong>Tên sản phẩm/Dịch vụ:</strong> Cột chứa tên món ăn/đồ uống</li>
+            <li><strong>Số lượng:</strong> Cột chứa số lượng bán ra</li>
+            <li><strong>Thành tiền:</strong> Cột chứa tổng tiền của món đó</li>
+            <li><strong>Nhân viên:</strong> Cột chứa tên nhân viên bán (tùy chọn)</li>
+            <li><strong>Ngày:</strong> Cột chứa ngày bán (tùy chọn)</li>
+          </ul>
+          <p class="note">
+            <mat-icon>lightbulb</mat-icon>
+            <strong>Lưu ý:</strong> Hệ thống sẽ tự động tạo sản phẩm mới nếu chưa có trong danh mục.
+            Tên cột có thể linh hoạt (VD: "Tên sản phẩm", "Dịch vụ", "Tên món", v.v.)
+          </p>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+  
+  <!-- Sales History
+  <mat-card class="history-card">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>history</mat-icon>
+        Lịch Sử Doanh Thu
+      </mat-card-title>
+      <div class="card-actions">
+        <button mat-button color="warn" (click)="clearSalesHistory()" [disabled]="salesHistory.length === 0">
+          <mat-icon>delete</mat-icon>
+          Xóa Lịch Sử
+        </button>
+        <button mat-button (click)="loadSalesHistory()" [disabled]="loading">
+          <mat-icon>refresh</mat-icon>
+          Tải Lại
+        </button>
+      </div>
+    </mat-card-header>
+    
+    <mat-card-content>
+      <div *ngIf="loading" class="loading">
+        <mat-spinner></mat-spinner>
+        <p>Đang tải dữ liệu...</p>
+      </div>
+    </mat-card-content>
+  </mat-card> -->
+</div>

@@ -1,0 +1,81 @@
+<div class="dialog-container">
+  <h2 mat-dialog-title>{{isEdit ? 'Chỉnh sửa' : 'Thêm'}} nguyên liệu</h2>
+  
+  <mat-dialog-content>
+    <form [formGroup]="ingredientForm" class="ingredient-form">
+      <div class="form-row">
+        <mat-form-field appearance="outline">
+          <mat-label>Tên nguyên liệu</mat-label>
+          <input matInput formControlName="name" (blur)="generateCode()" required>
+          <mat-error *ngIf="ingredientForm.get('name')?.hasError('required')">
+            Tên nguyên liệu là bắt buộc
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Mã nguyên liệu</mat-label>
+          <input matInput formControlName="code" required>
+          <mat-error *ngIf="ingredientForm.get('code')?.hasError('required')">
+            Mã nguyên liệu là bắt buộc
+          </mat-error>
+        </mat-form-field>
+      </div>
+
+      <div class="form-row">
+        <mat-form-field appearance="outline">
+          <mat-label>Đơn vị tính</mat-label>
+          <mat-select formControlName="unit" required>
+            <mat-option *ngFor="let unit of units" [value]="unit">
+              {{unit}}
+            </mat-option>
+          </mat-select>
+          <mat-error *ngIf="ingredientForm.get('unit')?.hasError('required')">
+            Đơn vị tính là bắt buộc
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Tồn kho hiện tại</mat-label>
+          <input matInput type="number" formControlName="currentStock" min="0" required>
+          <mat-error *ngIf="ingredientForm.get('currentStock')?.hasError('required')">
+            Tồn kho hiện tại là bắt buộc
+          </mat-error>
+          <mat-error *ngIf="ingredientForm.get('currentStock')?.hasError('min')">
+            Tồn kho không thể âm
+          </mat-error>
+        </mat-form-field>
+      </div>
+
+      <div class="form-row">
+        <mat-form-field appearance="outline">
+          <mat-label>Giá nhập (VNĐ)</mat-label>
+          <input matInput type="number" formControlName="costPrice" min="0" required>
+          <mat-error *ngIf="ingredientForm.get('costPrice')?.hasError('required')">
+            Giá nhập là bắt buộc
+          </mat-error>
+          <mat-error *ngIf="ingredientForm.get('costPrice')?.hasError('min')">
+            Giá nhập không thể âm
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Cảnh báo hết hàng</mat-label>
+          <input matInput type="number" formControlName="lowStockAlert" min="0">
+          <mat-hint>Để trống hoặc 0 để tắt cảnh báo</mat-hint>
+          <mat-error *ngIf="ingredientForm.get('lowStockAlert')?.hasError('min')">
+            Giá trị cảnh báo không thể âm
+          </mat-error>
+        </mat-form-field>
+      </div>
+    </form>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button (click)="onCancel()">Hủy</button>
+    <button mat-raised-button color="primary" 
+            (click)="onSave()" 
+            [disabled]="!ingredientForm.valid">
+      {{isEdit ? 'Cập nhật' : 'Thêm'}}
+    </button>
+  </mat-dialog-actions>
+</div>

@@ -128,3 +128,7 @@ mat-toolbar {
 .demo-content {
   background-color: #fff;
 }
+
+::ng-deep.mat-mdc-dialog-container ::ng-deep.mat-mdc-dialog-title+.mat-mdc-dialog-content {
+  padding-top: 16px !important;
+}

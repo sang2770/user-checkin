@@ -12,12 +12,8 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatMenuModule } from '@angular/material/menu';
-import { UserManagerComponent } from './user-manager/user-manager.component';
-import { UserManagerActionComponent } from './user-manager-action/user-manager-action.component';
-import { UserCheckinComponent } from './user-checkin/user-checkin.component';
-import { UserCheckinActionComponent } from './user-checkin-action/user-checkin-action.component';
-import { DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE, NativeDateAdapter, provideNativeDateAdapter } from '@angular/material/core';
-import {MatPaginatorModule} from '@angular/material/paginator';
+import { DateAdapter, MAT_DATE_LOCALE, NativeDateAdapter, provideNativeDateAdapter } from '@angular/material/core';
+import { MatPaginatorModule } from '@angular/material/paginator';
 import {
   MatDialogActions,
   MatDialogClose,
@@ -28,17 +24,29 @@ import {
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatListModule } from '@angular/material/list';
-import { DepartmentComponent } from './department/department.component';
-import { DepartmentActionComponent } from './department-action/department-action.component';
 import { MatSelectModule } from '@angular/material/select';
-import { PositionComponent } from './position/position.component';
 import { MatDatepickerModule } from '@angular/material/datepicker';
-import { PositionActionComponent } from './position-action/position-action.component';
 import { Platform } from '@angular/cdk/platform';
 import { MatCheckboxModule } from '@angular/material/checkbox';
-import { DevicesManagerComponent } from './devices-manager/devices-manager.component';
-import { DevicesActionComponent } from './devices-action/devices-action.component';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatCardModule } from '@angular/material/card';
+import { MatTooltipModule } from '@angular/material/tooltip';
+
+// Inventory Management Components
+import { IngredientsComponent } from './ingredients/ingredients.component';
+import { IngredientDialogComponent } from './ingredients/ingredient-dialog.component';
+import { ProductsComponent } from './products/products.component';
+import { ProductDialogComponent } from './products/product-dialog.component';
+import { RecipesComponent } from './recipes/recipes.component';
+import { RecipeDialogComponent } from './recipes/recipe-dialog.component';
+import { ImportSalesComponent } from './import-sales/import-sales.component';
+import { ReportsComponent } from './reports/reports.component';
+import { StockEntriesComponent } from './stock-entries/stock-entries.component';
+import { StockEntryDialogComponent } from './stock-entries/stock-entry-dialog.component';
+
 export class CustomDateAdapter extends NativeDateAdapter {
   override format(date: Date, displayFormat: any): string {
     const days = date.getDate();
@@ -47,10 +55,19 @@ export class CustomDateAdapter extends NativeDateAdapter {
     return days + '/' + months + '/' + year;
   }
 }
-
 @NgModule({
-  declarations: [AppComponent, UserManagerComponent, UserManagerActionComponent, UserCheckinComponent, UserCheckinActionComponent, DepartmentComponent, DepartmentActionComponent,
-    PositionComponent, PositionActionComponent, DevicesManagerComponent, DevicesActionComponent
+  declarations: [
+    AppComponent, 
+    IngredientsComponent,
+    IngredientDialogComponent,
+    ProductsComponent,
+    ProductDialogComponent,
+    RecipesComponent,
+    RecipeDialogComponent,
+    ImportSalesComponent,
+    ReportsComponent,
+    StockEntriesComponent,
+    StockEntryDialogComponent
   ],
   imports: [
     CommonModule,
@@ -76,14 +93,19 @@ export class CustomDateAdapter extends NativeDateAdapter {
     MatCheckboxModule,
     MatSlideToggleModule,
     MatPaginatorModule,
-    MatMenuModule
+    MatMenuModule,
+    MatProgressSpinnerModule,
+    MatSnackBarModule,
+    MatChipsModule,
+    MatCardModule,
+    MatTooltipModule
   ],
   providers: [provideNativeDateAdapter(),
   {
     provide: DateAdapter,
     useClass: CustomDateAdapter,
     deps: [MAT_DATE_LOCALE, Platform]
-  },
+  }
   ],
   bootstrap: [AppComponent],
 })
