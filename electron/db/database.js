@@ -831,11 +831,11 @@ module.exports = {
               return;
             }
 
-            if (totalAmount <= 0) {
-              errors.push(`Dòng ${index + 2}: Thành tiền phải lớn hơn 0`);
-              processRow(index + 1);
-              return;
-            }
+            // if (totalAmount <= 0) {
+            //   errors.push(`Dòng ${index + 2}: Thành tiền phải lớn hơn 0`);
+            //   processRow(index + 1);
+            //   return;
+            // }
 
             // Find or create product
             this.findProductByName(productName)
